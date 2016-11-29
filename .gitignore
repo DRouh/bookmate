@@ -1,0 +1,4 @@
+bin
+obj
+/.gitignore
+/bookmate/Settings.FSharpLint
