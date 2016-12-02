@@ -7,7 +7,11 @@ module EpubProcessor =
     open EpubSharp
     open HtmlAgilityPack
     open System.IO
-    
+    open java.io
+    open edu.stanford.nlp.``process``
+    open BookMate.Core.Helpers.RegexHelper
+
+
     let private prepareForExport = 
         Array.Parallel.map (fun (k, v) -> sprintf "%s %i %s" k v System.Environment.NewLine) >> String.concat (@"")
     
@@ -119,16 +123,24 @@ module EpubProcessor =
         do IOHelper.writeToFile (sprintf @"%s\%s-translations.txt" path fileName) toExportTranslation
     
     let processText (dict:Map<string,string>) (text:string) = 
-        let mutable processedText = text
-        let t = processedText.Trim()
-        if t <> "" && t <> "\r" && t <> "\r\n" && t <> "\n" then 
-            for k in dict do
-                if processedText.Contains(k.Key) then 
-                    let pattern = @"\b" + k.Key + @"\b"
-                    let replace = k.Key + "{" + k.Value + "}"
-                    if RegexHelper.isMatch pattern text then 
-                        processedText <- RegexHelper.regexReplace text pattern replace
-        processedText
+        match text.Trim() with 
+        | null | "" | "\r" | "\r\n" | "\n" -> text
+        | _ ->
+            let paragraph = text
+            let tokenizerFactory = PTBTokenizer.factory(CoreLabelTokenFactory(), "")       
+            let paragraphReader = new java.io.StringReader(paragraph)
+            let rawWords = tokenizerFactory.getTokenizer(paragraphReader).tokenize()
+            do paragraphReader.close()
+            
+            //remove not words
+            let wordsToCheck = rawWords.toArray() |> Array.map (string >> wordFilter) |> Array.where (Option.isSome) |> Array.map (Option.get)
+            let translations = wordsToCheck |> Array.Parallel.map (fun x-> (x, dict.TryFind(x))) |> Array.where (fun (x,y) -> y.IsSome) |> Array.map (fun (x,y) -> (x, y.Value))
+            let mutable processedText = text
+            for (k,v) in translations do
+                let pattern = @"\b" + k+ @"\b"
+                let replace = k + "{" + v + "}"
+                processedText <- RegexHelper.regexReplace text pattern replace
+            processedText 
 
     let processBook bookPath = 
         let fileName = getFileNameWithoutExtension bookPath
@@ -224,7 +236,7 @@ module EpubProcessor =
                 let progressPercent = (int (100.0f * (float32 i + 1.0f) / (float32 contentFiles.Length)))
                 printf "\rProcessing:%i%%" progressPercent
             let mutable result = null
-            use writer = new StringWriter()
+            use writer = new System.IO.StringWriter()
             html.Save(writer)
             result <- writer.ToString()
             IOHelper.writeToFile processingFileName result
