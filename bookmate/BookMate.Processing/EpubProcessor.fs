@@ -1,30 +1,18 @@
 ﻿namespace BookMate.Processing
 
 module EpubProcessor = 
-    open BookMate.Core.Helpers
     open BookMate.Core.Helpers.IOHelper
     open BookMate.Helpers
     open EpubSharp
     open HtmlAgilityPack
     open System.IO
-    open java.io
-    open edu.stanford.nlp.``process``
-    open BookMate.Core.Helpers.RegexHelper
+    open BookMate.Helpers.AnalyseHelper
+    open POSHelper
+    open BookMate.Core.Helpers
 
+    let private prepareStatForExport = Array.Parallel.map (fun (w, p, c) -> sprintf "%s %A %i %s" w p c System.Environment.NewLine) >> String.concat (@"")
+    let private prepareNewTranslationsForExport = Array.Parallel.map (fun (w, p,s) -> sprintf "%s, %s, %s %s" w p s System.Environment.NewLine) >> String.concat (@"")
 
-    let private prepareForExport = 
-        Array.Parallel.map (fun (k, v) -> sprintf "%s %i %s" k v System.Environment.NewLine) >> String.concat (@"")
-    
-    let private prepareForExport2 (s : (string * string) []) = 
-        s
-        |> Array.Parallel.map (fun (k, v) -> (k.Trim(), v.Trim()))
-        |> Array.Parallel.map (fun (k, v) -> sprintf "%s, %s%s" k (v) System.Environment.NewLine)
-        |> String.concat (@"")
-    
-    let private writeStatsToFile stat path name = 
-        let statString = stat |> prepareForExport
-        do IOHelper.writeToFile (path +/ name + "-stats.txt") statString
-    
     let private loadBook bookPath = 
         match bookPath with
         | "" | null -> failwith "Can't use empty file path to load the book"
@@ -38,143 +26,132 @@ module EpubProcessor =
                 text
             | _ -> failwith "File does not exist."
     
-    let private downloadTranslations (toQuery : string []) = 
-        let chunkSize = 30
-        //progress update
-        let progress = (float32 toQuery.Length) / 30.0f
-        let mutable a = 0
-        
-        let updateDownloadProgress() = 
-            a <- a + 1
-            printf "\rDownloading translations:%i%%" (int (100.0f * (float32 a / progress)))
-        
-        let splitByChuncks = 
-            Array.chunkBySize chunkSize
-            >> Array.map (Array.reduce StringHelper.stringify)
-            >> Array.ofSeq
-        
-        let asyncParalleldownload = 
-            Array.Parallel.mapi 
-                (fun i p -> (p, (YandexHelper.askYaTranslateAsyncf p updateDownloadProgress) |> Async.RunSynchronously))
-        
-        let form (arg : (string * string []) []) = 
-            arg
-            |> Array.Parallel.map (fun (p, a) -> (StringHelper.unstringify p, a))
-            |> Array.Parallel.map (fun (p, a) -> (p, a, p.Length = a.Length))
-            |> Array.Parallel.map (fun (p, a, se) -> 
-                   if (se) then (Seq.zip p a)
-                   else Seq.empty<string * string>)
-            |> Seq.concat
-            |> Array.ofSeq
-        printfn ""
-        toQuery
-        |> splitByChuncks
-        |> asyncParalleldownload
-        |> form
-    
-    let private downloadManyTranslations (toQuery : string []) = 
-        //progress update
-        printfn ""
-        let progress = (float32 toQuery.Length)
-        let mutable a = 0
-        
-        let updateDownloadProgress() = 
-            a <- a + 1
-            printf "\rDownloading dictionary translations:%i%%" (int (100.0f * (float32 a / progress)))
-        
-        let asyncParalleldownload = 
-            Array.Parallel.mapi 
-                (fun i p -> (p, (YandexHelper.askYaDictionaryAsyncf p updateDownloadProgress) |> Async.RunSynchronously))
-        
-        let oneToMany (ys : string []) (x : string) = 
-            x
-            |> Array.replicate ys.Length
-            |> Array.zip ys
-        printfn ""
-        toQuery
-        |> asyncParalleldownload
-        |> Array.Parallel.map (fun (x, y) -> oneToMany y x)
-        |> Array.concat
-        |> Array.Parallel.map (fun (x, y) -> (y, x))
-    
-    let saveBookStats text storedTranslationsForBook bookPath = 
-        let path = getDirectoryName bookPath
-        let fileName = getFileNameWithoutExtension bookPath
-        let stat = AnalyseHelper.getWordStats text
-        let forExportStat = stat |> prepareForExport
-        do IOHelper.writeToFile (path +/ (sprintf "%s-stat.txt" fileName)) forExportStat
+    let tryFind (word:string) (lookup:(string*(CommonPoS*string)[])[]) =
+        lookup |> Array.where (fun (e, _) -> e = word) |> Seq.tryHead
 
-        let uniqueWords = 
-            stat
-            |> Array.Parallel.map (fun (k, v) -> k)
-            |> Array.distinct
-        
-        let toQuery = uniqueWords |> Array.except (storedTranslationsForBook |> Array.Parallel.map (fun (x, y) -> x))
-        let downloadedTranslations = downloadManyTranslations (toQuery |> Array.take 0)
-        let allTranslations = downloadedTranslations |> Array.append (storedTranslationsForBook)
-        
-        let toExportTranslation = 
-            allTranslations
-            |> Array.Parallel.map (fun (x, y) -> (x.Trim(), y.Trim()))
-            |> Array.distinct
-            |> Array.where (fun (x, y) -> x <> y)
-            |> Array.except (storedTranslationsForBook)
-            |> prepareForExport2
-        do IOHelper.writeToFile (sprintf @"%s\%s-translations.txt" path fileName) toExportTranslation
-    
-    let processText (dict:Map<string,string>) (text:string) = 
+
+    let processText (posTagger) (dict:(string*(CommonPoS*string)[])[]) (text:string) = 
         match text.Trim() with 
         | null | "" | "\r" | "\r\n" | "\n" -> text
         | _ ->
             let paragraph = text
-            let tokenizerFactory = PTBTokenizer.factory(CoreLabelTokenFactory(), "")       
-            let paragraphReader = new java.io.StringReader(paragraph)
-            let rawWords = tokenizerFactory.getTokenizer(paragraphReader).tokenize()
-            do paragraphReader.close()
+            let wordsToCheck = textToWords <| true <| paragraph 
+            let translations = 
+                wordsToCheck 
+                |> Array.Parallel.map (fun w -> (w, tryFind w dict)) 
+                |> Array.where (fun (_, x) -> x.IsSome)
+                |> Array.Parallel.map (fun (_, x)  -> x.Value)
+                |> Map.ofArray
             
-            //remove not words
-            let wordsToCheck = rawWords.toArray() |> Array.map (string >> wordFilter) |> Array.where (Option.isSome) |> Array.map (Option.get)
-            let translations = wordsToCheck |> Array.Parallel.map (fun x-> (x, dict.TryFind(x))) |> Array.where (fun (x,y) -> y.IsSome) |> Array.map (fun (x,y) -> (x, y.Value))
+            let taggedWords = tagWords posTagger paragraph//todo refactor this to return common pos 
             let mutable processedText = text
-            for (k,v) in translations do
-                let pattern = @"\b" + k+ @"\b"
-                let replace = k + "{" + v + "}"
-                processedText <- RegexHelper.regexReplace text pattern replace
+            for (word, pos) in taggedWords do
+                match stanfordToCommonPos pos with
+                | None -> ()
+                | Some commonPos ->
+                    let wordTranslations =  translations.TryFind word
+                    match wordTranslations with
+                    | Some v ->
+                        if Seq.isEmpty v then 
+                            ()
+                        else
+                            let translationsForExactPos = v |> Array.where (fun (p, _) -> commonPos |> List.contains p)
+                            let choice = if Seq.isEmpty translationsForExactPos then v else translationsForExactPos
+                            let translationsToUse = choice|> Array.map (fun (_, t) -> t) |> Seq.truncate 3 |> Array.ofSeq |> Array.reduce (StringHelper.stringify)
+                            let pattern = @"\b" + word + @"\b"
+                            let replace = word + "{" + translationsToUse + "}"
+                            processedText <- RegexHelper.regexReplace text pattern replace
+                    | None -> ()
             processedText 
 
+    let convertPosForArray  =
+        Array.Parallel.map (fun (e, pS, r) -> (e, matchCommonPos pS, r))
+        >> Array.where (fun (_, p, _) -> p.IsSome)
+        >> Array.Parallel.map  (fun (e, p, r) -> (e, p.Value, r))
+
+    let formDictionaryForBook (userDefinedWords:string[]) wordStat queriedTranslations (dbDictionary:(string*CommonPoS*string)[]) =
+        let numOfTranslationsToUse = 3
+        //todo determine complexity of word or its spread
+        let wordsToTranslate = 
+            wordStat 
+            |> Array.Parallel.map (fun (e:string, posString, r) -> (e.ToLower(), posString, r))
+            |> Array.where (fun (e, p, c) -> c < 20 || (userDefinedWords |> Seq.contains e))
+
+        let trans = 
+            queriedTranslations 
+            |> convertPosForArray
+            
+        let lookupWord (lookupDic:(string*CommonPoS*string)[]) (engWord:string) (pos:CommonPoS[])  = 
+            let existInPos (x:CommonPoS) = pos |> Array.exists (fun elem -> elem = x)
+            let all = lookupDic |> Array.where (fun (e, p, t) -> e = engWord)
+            let exactPos = all |> Array.where (fun (e, p, t) -> existInPos p)
+            let res = if exactPos <> Array.empty then exactPos else all
+            res |> Seq.truncate numOfTranslationsToUse |> Array.ofSeq |> Array.map (fun (e,p,s) -> (p,s))
+
+        let look = lookupWord <| (trans |> Array.append (dbDictionary) |> Array.distinct)
+        let oneToMany (ys:'a[]) x = 
+            x
+            |> Array.replicate ys.Length
+            |> Array.zip ys
+
+        let translatedWords = 
+            wordsToTranslate 
+            |> Array.Parallel.map (fun (eng, pos, _) -> (eng, pos, look <| eng <| pos))
+            //|> Array.Parallel.map (fun (e, _, trs) -> (oneToMany trs e))
+            |> Array.Parallel.map (fun (e, _, trs) -> (e, trs))
+        translatedWords
+
+    let loadUserDefinedWords = 
+        let fileName = BookMate.Core.Configuration.getUserDefinedWordsFilePath
+        if File.Exists fileName then
+            let words = File.ReadAllLines fileName
+            words
+        else 
+            Array.empty<string>
+
+     //Array.empty<string>
     let processBook bookPath = 
         let fileName = getFileNameWithoutExtension bookPath
         let path = getDirectoryName bookPath
         printfn "Processing %s" fileName
         
-        //analyze book's content
+        //load book
         let text = loadBook bookPath
-        let wordStat = AnalyseHelper.getWordStats text
-        let wordsToTranslate = wordStat |> Array.where (fun (k,v) -> v < 15) |> Array.Parallel.map (fun (k, v) -> k) |> Array.where (fun x -> x.Length > 3)
-        let dbDictionary = BookMate.Integration.DBHelper.loadFromDB
         
-        do saveBookStats <| text <| dbDictionary <| bookPath
+        //load pos tagger
+        let posTagger = getPosTagger
         
-        //group and stringify!
-        let dic = 
-            dbDictionary
-            |> Array.where (fun (x, y) -> x.Length > 3)
-            |> Array.groupBy (fun (x, y) -> x)
-            |> Array.Parallel.map (fun (x, y) -> 
-                   (x, 
-                    y
-                    |> Array.map (fun (_, d) -> d)
-                    |> Seq.truncate 3
-                    |> Seq.reduce StringHelper.stringify))
-            |> Map.ofArray
+        //load dictionary from database
+        let dbDictionary = BookMate.Integration.DBHelper.loadFromDB |> convertPosForArray
+
+        //get book statistics
+        let wordStat = AnalyseHelper.getWordStats2 posTagger text
+
+        //save book statistics
+        let statToExport' = wordStat |> prepareStatForExport
+        do IOHelper.writeToFile (path +/ (sprintf "%s-pos-stat.txt" fileName)) statToExport'
+
+        //detetrmine words to query translation for
+        let userDefinedWords = loadUserDefinedWords //load words that user explicitly asked to translate
+        let translationsToQuery = 
+            wordStat 
+            |> Array.Parallel.map (fun (x, y, z) -> x) 
+            |> Array.where (fun x -> x.Length >= 3)
+            |> Array.append (userDefinedWords)
+            |> Array.distinct
+            |> Array.except (dbDictionary |> Array.map (fun (x, y, z) -> x) |> Array.distinct) 
+            |> Seq.truncate 0 //todo remove this
+            |> Array.ofSeq //todo remove this
+
+        let queriedTranslations = TranslationDownloadHelper.downloadDictionaryTranslations <| translationsToQuery 
+        //save queried translations
+        let preparedForSavingTranslations = prepareNewTranslationsForExport <| queriedTranslations
+        do IOHelper.writeToFile (path +/ (sprintf "%s-translations.txt" fileName)) preparedForSavingTranslations
         
-        let translationsToUse = 
-            wordsToTranslate
-            |> Array.Parallel.map (fun x -> (x, dic.TryFind(x)))
-            |> Array.where (fun (_, y) -> y.IsSome)
-            |> Array.Parallel.map (fun (x, y) -> (x, y.Value))
-            |> Map.ofArray
+        //form dictionary for the book
+        let dictionaryForBook = formDictionaryForBook userDefinedWords wordStat queriedTranslations dbDictionary
         
+        //IO operations - creatint tmp folder, unzipping file,...
         let (tmpUnCompressedBookPath, tmpPath) = 
             //creating folder for processing
             let tmpPath = path +/ sprintf "tmp_%s" (System.Guid.NewGuid().ToString())
@@ -198,13 +175,12 @@ module EpubProcessor =
             if (Directory.Exists(tmpUnCompressedBookPath +/ "OEBPS")) then tmpUnCompressedBookPath +/ "OEBPS"
             else tmpUnCompressedBookPath
         
-        let contentFiles = Directory.GetFiles(workingPath, "*.*html")
+        let contentFiles = Directory.GetFiles(workingPath, "*.*html", System.IO.SearchOption.AllDirectories)
         printfn "Discovered file structure:"
         for f in contentFiles do
             do printfn "-%s" <| getFileName f
         
-        let translateProcesText = processText <| translationsToUse
-
+        let translateProcessText = processText <| posTagger <| dictionaryForBook
         let updateProgress fileCount nodeCount fileInd nodeInd =
             let processedNodeProgress = (float32 nodeInd) / (float32 nodeCount)
             let prevFilesProgress = (float32 fileInd) / (float32 fileCount - 1.0f)
@@ -229,7 +205,7 @@ module EpubProcessor =
                     do updateProgress filesToProcessCount textNodes.Count i inx
                     if p :? HtmlTextNode then 
                         let node = p :?> HtmlTextNode
-                        node.Text <- translateProcesText <| node.Text
+                        node.Text <- translateProcessText <| node.Text
                     inx <- inx + 1
             else 
                 do updateProgress filesToProcessCount 1 i 1

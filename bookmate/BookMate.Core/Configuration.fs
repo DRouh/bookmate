@@ -6,3 +6,4 @@ module Configuration =
     let getYandexDictionaryApiEndPoint = ""
     let getYandexDictionaryApiKey = ""
     let getDBConnectionString = "" |> System.IO.Path.GetFullPath
+    let getUserDefinedWordsFilePath = @""

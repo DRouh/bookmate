@@ -1,4 +1,4 @@
-﻿namespace BookMate.Helpers
+﻿namespace BookMate.Integration
 
 module YandexHelper = 
     open BookMate.Core.Helpers.StringHelper
@@ -52,7 +52,7 @@ module YandexHelper =
             let askYa = askYandexDictionary apiEndpoint apiKey
             let! response = askYa words
             let text = response |> DictionaryYandexResponse.Parse
-            let translations = text.Def |> Array.collect ((fun x -> x.Tr) >> (fun x -> x |> Array.map (fun y -> y.Text)))
+            let translations = text.Def |> Array.collect ((fun x -> x.Tr) >> (fun x -> x |> Array.map (fun y -> (y.Pos, y.Text))))
             return translations
         } 
     let askYaDictionaryAsyncf words f = 

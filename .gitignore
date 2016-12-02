@@ -2,3 +2,5 @@ bin
 obj
 /.gitignore
 /bookmate/Settings.FSharpLint
+.vs
+/bookmate/packages

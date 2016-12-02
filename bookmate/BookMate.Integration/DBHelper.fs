@@ -14,7 +14,7 @@ module DBHelper =
         let query1 =
           query {
             for row in ctx.Main.Dictionary do
-            select (row.Eng, row.Ru)//sqlite type provder will not be able to discover string columns with length 
+            select (row.Eng, row.PoS, row.Ru)//sqlite type provder will not be able to discover string columns with length 
           } |> Seq.toArray
         query1
 
