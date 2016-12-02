@@ -9,13 +9,12 @@ module DBHelper =
 //   let private connectionString = BookMate.Core.Configuration.getDBConnectionString
     type SQL = SqlDataProvider<ConnectionString = ExConnectionString, DatabaseVendor = Common.DatabaseProviderTypes.SQLITE, ResolutionPath = ResolutionPath, IndividualsAmount = 1000>
     let loadFromDB = 
-        printf "Loading stored dictionary..."
+        printfn "Loading stored dictionary..." 
         let ctx = SQL.GetDataContext()
         let query1 =
           query {
             for row in ctx.Main.Dictionary do
             select (row.Eng, row.Ru)//sqlite type provder will not be able to discover string columns with length 
           } |> Seq.toArray
-        printf "Done"
         query1
 

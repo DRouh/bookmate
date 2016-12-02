@@ -24,18 +24,7 @@ module YandexHelper =
                     query = [ "key", apiKey
                               "text", words
                               "lang", "en-ru" ], headers = [ "Accept", "application/json" ])
-//TranslateAPI    
-    let askYaTranslateAsyncf words f = 
-        async { 
-            let apiKey = translateApiKey
-            let apiEndpoint = translateApiEndPoint
-            let askYa = askYandexTranslate apiEndpoint apiKey
-            let! response = askYa words
-            let text = response |> TranslateYandexResponse.Parse
-            let split = text.Text |> Array.collect ((unstringify) >> (Array.map (fun x -> x.Trim())))
-            f()
-            return split
-        }
+//TranslateAPI   
 
     let askYaTranslateAsync words = 
         async { 
@@ -47,6 +36,14 @@ module YandexHelper =
             let split = text.Text |> Array.collect ((unstringify) >> (Array.map (fun x -> x.Trim())))
             return split
         }
+         
+    let askYaTranslateAsyncf words f = 
+        async { 
+            let! split = askYaTranslateAsync words
+            f()
+            return split
+        }
+
 //DictionaryAPI
     let askYaDictionaryAsync words = 
         async { 
@@ -60,12 +57,7 @@ module YandexHelper =
         } 
     let askYaDictionaryAsyncf words f = 
         async { 
-            let apiKey = dictionaryApiKey
-            let apiEndpoint = dictionaryApiEndPoint
-            let askYa = askYandexDictionary apiEndpoint apiKey
-            let! response = askYa words
-            let text = response |> DictionaryYandexResponse.Parse
+            let! translations = askYaDictionaryAsync words
             f()
-            let translations = text.Def |> Array.collect ((fun x -> x.Tr) >> (fun x -> x |> Array.map (fun y -> y.Text)))
             return translations
         } 

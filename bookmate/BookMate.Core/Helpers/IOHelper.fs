@@ -6,10 +6,11 @@ module IOHelper =
     let (+/) path1 path2 = Path.Combine(path1, path2)
     let getDirectoryName path = Path.GetDirectoryName(path)
     let getFileNameWithoutExtension path = Path.GetFileNameWithoutExtension(path)
+    let getFileName path = Path.GetFileName(path)
 
     let writeToFile (fileName : string) (whatToWrite : string) = 
         let wr = new System.IO.StreamWriter(fileName)
-        let text = whatToWrite |> wr.Write
+        do wr.Write whatToWrite  
         wr.Close()
     
     ///Deletes files with give pattern.

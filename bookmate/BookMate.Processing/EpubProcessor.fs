@@ -8,20 +8,20 @@ module EpubProcessor =
     open HtmlAgilityPack
     open System.IO
     
-    let prepareForExport = 
+    let private prepareForExport = 
         Array.Parallel.map (fun (k, v) -> sprintf "%s %i %s" k v System.Environment.NewLine) >> String.concat (@"")
     
-    let prepareForExport2 (s : (string * string) []) = 
+    let private prepareForExport2 (s : (string * string) []) = 
         s
         |> Array.Parallel.map (fun (k, v) -> (k.Trim(), v.Trim()))
         |> Array.Parallel.map (fun (k, v) -> sprintf "%s, %s%s" k (v) System.Environment.NewLine)
         |> String.concat (@"")
     
-    let wrireStatsToFile stat path name = 
+    let private writeStatsToFile stat path name = 
         let statString = stat |> prepareForExport
         do IOHelper.writeToFile (path +/ name + "-stats.txt") statString
     
-    let loadBook bookPath = 
+    let private loadBook bookPath = 
         match bookPath with
         | "" | null -> failwith "Can't use empty file path to load the book"
         | path -> 
@@ -34,7 +34,7 @@ module EpubProcessor =
                 text
             | _ -> failwith "File does not exist."
     
-    let downloadTranslations (toQuery : string []) = 
+    let private downloadTranslations (toQuery : string []) = 
         let chunkSize = 30
         //progress update
         let progress = (float32 toQuery.Length) / 30.0f
@@ -62,12 +62,13 @@ module EpubProcessor =
                    else Seq.empty<string * string>)
             |> Seq.concat
             |> Array.ofSeq
+        printfn ""
         toQuery
         |> splitByChuncks
         |> asyncParalleldownload
         |> form
     
-    let downloadManyTranslations (toQuery : string []) = 
+    let private downloadManyTranslations (toQuery : string []) = 
         //progress update
         printfn ""
         let progress = (float32 toQuery.Length)
@@ -85,30 +86,27 @@ module EpubProcessor =
             x
             |> Array.replicate ys.Length
             |> Array.zip ys
+        printfn ""
         toQuery
         |> asyncParalleldownload
         |> Array.Parallel.map (fun (x, y) -> oneToMany y x)
         |> Array.concat
         |> Array.Parallel.map (fun (x, y) -> (y, x))
     
-    let processBook bookPath = 
-        let fileName = getFileNameWithoutExtension bookPath
+    let saveBookStats text storedTranslationsForBook bookPath = 
         let path = getDirectoryName bookPath
-        printfn "Processing %s" fileName
-        //analyze book's content
-        let text = loadBook bookPath
+        let fileName = getFileNameWithoutExtension bookPath
         let stat = AnalyseHelper.getWordStats text
         let forExportStat = stat |> prepareForExport
-        do IOHelper.writeToFile (IOHelper.op_PlusDivide path (sprintf "%s-Stat.txt" fileName)) forExportStat
-        let uniqueRare = 
+        do IOHelper.writeToFile (path +/ (sprintf "%s-stat.txt" fileName)) forExportStat
+
+        let uniqueWords = 
             stat
-            |> Array.where (fun (k, v) -> v < 20)
             |> Array.Parallel.map (fun (k, v) -> k)
             |> Array.distinct
         
-        let storedTranslationsForBook = BookMate.Integration.DBHelper.loadFromDB
-        let toQuery = uniqueRare |> Array.except (storedTranslationsForBook |> Array.Parallel.map (fun (x, y) -> x))
-        let downloadedTranslations = downloadManyTranslations (toQuery |> Array.take 1) //remove truncate 
+        let toQuery = uniqueWords |> Array.except (storedTranslationsForBook |> Array.Parallel.map (fun (x, y) -> x))
+        let downloadedTranslations = downloadManyTranslations (toQuery |> Array.take 0)
         let allTranslations = downloadedTranslations |> Array.append (storedTranslationsForBook)
         
         let toExportTranslation = 
@@ -116,12 +114,38 @@ module EpubProcessor =
             |> Array.Parallel.map (fun (x, y) -> (x.Trim(), y.Trim()))
             |> Array.distinct
             |> Array.where (fun (x, y) -> x <> y)
-            //  |> Array.except (storedTranslationsForBook)
+            |> Array.except (storedTranslationsForBook)
             |> prepareForExport2
         do IOHelper.writeToFile (sprintf @"%s\%s-translations.txt" path fileName) toExportTranslation
+    
+    let processText (dict:Map<string,string>) (text:string) = 
+        let mutable processedText = text
+        let t = processedText.Trim()
+        if t <> "" && t <> "\r" && t <> "\r\n" && t <> "\n" then 
+            for k in dict do
+                if processedText.Contains(k.Key) then 
+                    let pattern = @"\b" + k.Key + @"\b"
+                    let replace = k.Key + "{" + k.Value + "}"
+                    if RegexHelper.isMatch pattern text then 
+                        processedText <- RegexHelper.regexReplace text pattern replace
+        processedText
+
+    let processBook bookPath = 
+        let fileName = getFileNameWithoutExtension bookPath
+        let path = getDirectoryName bookPath
+        printfn "Processing %s" fileName
+        
+        //analyze book's content
+        let text = loadBook bookPath
+        let wordStat = AnalyseHelper.getWordStats text
+        let wordsToTranslate = wordStat |> Array.where (fun (k,v) -> v < 15) |> Array.Parallel.map (fun (k, v) -> k) |> Array.where (fun x -> x.Length > 3)
+        let dbDictionary = BookMate.Integration.DBHelper.loadFromDB
+        
+        do saveBookStats <| text <| dbDictionary <| bookPath
+        
         //group and stringify!
         let dic = 
-            storedTranslationsForBook
+            dbDictionary
             |> Array.where (fun (x, y) -> x.Length > 3)
             |> Array.groupBy (fun (x, y) -> x)
             |> Array.Parallel.map (fun (x, y) -> 
@@ -133,27 +157,31 @@ module EpubProcessor =
             |> Map.ofArray
         
         let translationsToUse = 
-            uniqueRare
-            |> Array.where (fun x -> x.Length > 3)
+            wordsToTranslate
             |> Array.Parallel.map (fun x -> (x, dic.TryFind(x)))
             |> Array.where (fun (_, y) -> y.IsSome)
             |> Array.Parallel.map (fun (x, y) -> (x, y.Value))
             |> Map.ofArray
         
-        //creating folder for processing
-        let tmpFolderName = sprintf "tmp_%s" (System.Guid.NewGuid().ToString())
-        let tmpPath = IOHelper.op_PlusDivide path tmpFolderName
-        createFolder tmpPath |> ignore
-        let tmpFileName = IOHelper.op_PlusDivide tmpPath (fileName + ".zip")
-        printfn "Created tmp folder %s..." tmpPath
-        //creating zip and ucompress it
-        do File.Copy(bookPath, tmpFileName)
-        do File.SetAttributes(tmpFileName, FileAttributes.Normal) //needed to allow deleting of this file
-        let tmpUnCompressedBookPath = IOHelper.op_PlusDivide tmpPath fileName
-        createFolder (tmpUnCompressedBookPath) |> ignore
-        do unzipFile tmpFileName tmpUnCompressedBookPath
+        let (tmpUnCompressedBookPath, tmpPath) = 
+            //creating folder for processing
+            let tmpPath = path +/ sprintf "tmp_%s" (System.Guid.NewGuid().ToString())
+            createFolder tmpPath |> ignore
+            let tmpFileName = tmpPath +/ (fileName + ".zip")
+            printfn "Created tmp folder %s..." tmpPath
+
+            //creating zip and ucompress it
+            do File.Copy(bookPath, tmpFileName)
+            do File.SetAttributes(tmpFileName, FileAttributes.Normal) //needed to allow deleting of this file
+
+            let tmpUnCompressedBookPath = tmpPath +/ fileName
+            createFolder (tmpUnCompressedBookPath) |> ignore
+            do unzipFile tmpFileName tmpUnCompressedBookPath
+            (tmpUnCompressedBookPath, tmpPath)
+        
         //analyzing contents
-        //not all EPUB file have appropriate structure so check if OEBPS folder exists and if it does not then look for content file in the root 
+        //not all EPUB file have appropriate structure so check if OEBPS folder exists 
+        //and if it doesn't then look for a content files in the root 
         let workingPath = 
             if (Directory.Exists(tmpUnCompressedBookPath +/ "OEBPS")) then tmpUnCompressedBookPath +/ "OEBPS"
             else tmpUnCompressedBookPath
@@ -161,37 +189,38 @@ module EpubProcessor =
         let contentFiles = Directory.GetFiles(workingPath, "*.*html")
         printfn "Discovered file structure:"
         for f in contentFiles do
-            printfn "-%s" f
+            do printfn "-%s" <| getFileName f
+        
+        let translateProcesText = processText <| translationsToUse
+
+        let updateProgress fileCount nodeCount fileInd nodeInd =
+            let processedNodeProgress = (float32 nodeInd) / (float32 nodeCount)
+            let prevFilesProgress = (float32 fileInd) / (float32 fileCount - 1.0f)
+            let processedFilesProgress = (float32 fileInd + 1.0f) / (float32 fileCount)
+            let progressPercent = int <| (50.0f * (prevFilesProgress + processedNodeProgress * processedFilesProgress))
+            printf "\rProcessing:%i%%" progressPercent
+
         //actual translation here
+        let filesToProcessCount = contentFiles.Length
         for i in 0..contentFiles.Length - 1 do
+
             let processingFileName = workingPath +/ contentFiles.[i]
             let html = new HtmlAgilityPack.HtmlDocument()
             html.OptionWriteEmptyNodes <- true
             html.OptionOutputAsXml <- true
             do html.Load(processingFileName, System.Text.Encoding.UTF8)
             let textNodes = html.DocumentNode.SelectNodes("//p//text()")
+            
             if not (isNull textNodes) then 
                 let mutable inx = 1
                 for p in textNodes do
-                    let progressPercent = 
-                        (int 
-                             (100.0f 
-                              * (((((float32 inx) / (float32 textNodes.Count))) * (float32 i + 1.0f)) 
-                                 / (float32 contentFiles.Length))))
-                    printf "\rProcessing:%i%%" progressPercent
+                    do updateProgress filesToProcessCount textNodes.Count i inx
                     if p :? HtmlTextNode then 
                         let node = p :?> HtmlTextNode
-                        let t = node.Text.Trim()
-                        if t <> "" && t <> "\r" && t <> "\r\n" && t <> "\n" then 
-                            let mutable text = node.Text
-                            for (k) in translationsToUse do
-                                if text.Contains(k.Key) then 
-                                    let pattern = @"\b" + k.Key + @"\b"
-                                    let replace = k.Key + "{" + k.Value + "}"
-                                    if RegexHelper.isMatch pattern text then 
-                                        node.Text <- RegexHelper.regexReplace text pattern replace
+                        node.Text <- translateProcesText <| node.Text
                     inx <- inx + 1
             else 
+                do updateProgress filesToProcessCount 1 i 1
                 let progressPercent = (int (100.0f * (float32 i + 1.0f) / (float32 contentFiles.Length)))
                 printf "\rProcessing:%i%%" progressPercent
             let mutable result = null
@@ -199,6 +228,9 @@ module EpubProcessor =
             html.Save(writer)
             result <- writer.ToString()
             IOHelper.writeToFile processingFileName result
+        
+        printfn "" 
+
         //preparing new epub file
         let newFileName = path +/ (sprintf "%s-translated.epub" fileName)
         do zipFile tmpUnCompressedBookPath newFileName
