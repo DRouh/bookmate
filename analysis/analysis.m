@@ -1,4 +1,5 @@
 clear ; close all; clc
+pkg load signal;
 
 if exist("data.mat", 'file') == 2
   fprintf('Loading data....\n');
@@ -16,15 +17,17 @@ if exist("answers.mat", 'file') == 2
   data = importdata("answers.mat");
   d = data.answers;
   m = data.m;
+  d(1) = 1;
 else
   m = (max(count) - min(count));
   d = count / m;
+  d(1) = 1;
   m = (max(d)-min(d))/2;
 end
 prompt = 'How many words you would want to answer: ';
 wordCount = input(prompt);
 value = m / 2;
-m
+
 %positioning figure on display
 ss = get(0,'screensize'); %The screen size
 width = ss(3);
@@ -38,15 +41,18 @@ set(H,'Position',[width-horz-50, height-vert-100, horz, vert]);
 
 for i = 1:wordCount
   %plotting
-  plot (count, d, "*", "markersize", 7);
+  plot (count, d, "o", "markersize", 7);
   hold;
-  plot (count, d);
-  plot (count, medfilt1(d,10), 'linewidth', 3);
-  legend ("normailzed count","probability locus","median filter");
+  plot (count, d, 'linewidth', 2);
+  plot (count, medfilt1(d, 10), 'linewidth', 3);
+
   
   fprintf('Looking for closest to %f \n', value);
   [c index] = min(abs(d - value));
   fprintf('The word is "%s"\n', words{index,1});
+  
+  plot(count(index), d(index),'LineWidth',2, "gx", "markersize", 15)
+  legend ("normailzed count","probability locus","median filter", "current question");
   
   %accept user's input
   userAsnwered = false;
@@ -78,11 +84,14 @@ for i = 1:wordCount
 %    end
 %  end  
   
+  %modify distibution?
 
+  newMinIndexOfLastKnown = min(find(d ~= 1 & d ~= 0)); 
+  newMinIndexOfLastKnown
+  d(newMinIndexOfLastKnown)
+  d(max(find(d ~= 1 & d ~= 0)))
 
-  %rebuild distibution?
-  newMinIndexOfLastKnown = min(find(d ~= 1)); 
-  newMax = max(d(newMinIndexOfLastKnown))-min(d);
+  newMax = d(newMinIndexOfLastKnown)-min(d);
   value = (newMax)/2;
 end  
 
