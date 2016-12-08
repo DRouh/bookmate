@@ -2,12 +2,14 @@ clear ; close all; clc
 
 if exist("data.mat", 'file') == 2
   fprintf('Loading data....\n');
-  S = load("data");
-  words = S.A;
-  count = S.B;
+  data = importdata("data.mat");
+  words = data.w;
+  count = data.c;
 else
-  [words, count] = textread('short.txt', '%s %f', 'delimiter' , ' ', 2);
-  save data.mat A B
+  [w, c] = textread('short.txt', '%s %f', 'delimiter' , ' ', 2);
+  save data.mat w c
+  words = w;
+  count = c;
 end
 
 %F = words{:,1};
@@ -21,9 +23,9 @@ else
 end
 
 prompt = 'How many words you would want to answer?';
-x = input(prompt);
+wordCount = input(prompt);
 
-for i = 1:x
+for i = 1:wordCount
   figure(1);
   plot (count, d, "*", "markersize", 7);
   hold;
@@ -53,10 +55,9 @@ for i = 1:x
       userAsnwered = false;
     end
     
-    if i ~= 10
+    if i ~= wordCount
       clf;
     end  
-    
   end 
   %rebuild distibution?
 end  
