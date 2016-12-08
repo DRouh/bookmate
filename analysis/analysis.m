@@ -13,40 +13,43 @@ else
 end
 
 if exist("answers.mat", 'file') == 2
-  d = importdata("answers.mat");
+  data = importdata("answers.mat");
+  d = data.answers;
+  m = data.m;
 else
   m = (max(count) - min(count));
   d = count / m;
+  m = (max(d)-min(d))/2;
 end
-
-
+prompt = 'How many words you would want to answer: ';
+wordCount = input(prompt);
+value = m / 2;
+m
 %positioning figure on display
 ss = get(0,'screensize'); %The screen size
 width = ss(3);
 height = ss(4);
 H = figure;
+set(H,"visible","on");
 vert = 400; %300 vertical pixels
 horz = 550; %600 horizontal pixels
 %This will place the figure in the top-right corner
 set(H,'Position',[width-horz-50, height-vert-100, horz, vert]);
 
-
-prompt = 'How many words you would want to answer: ';
-wordCount = input(prompt);
-value = (m)/2;
 for i = 1:wordCount
   %plotting
   plot (count, d, "*", "markersize", 7);
   hold;
   plot (count, d);
-
-  %find value closest to 0.5
-  %which means uncertainty
+  plot (count, medfilt1(d,10), 'linewidth', 3);
+  legend ("normailzed count","probability locus","median filter");
+  
   fprintf('Looking for closest to %f \n', value);
   [c index] = min(abs(d - value));
   fprintf('The word is "%s"\n', words{index,1});
-  userAsnwered = false;
   
+  %accept user's input
+  userAsnwered = false;
   while ~userAsnwered  
     prompt = 'Do you know this word (1/0)? ';
     x = input(prompt);
@@ -65,13 +68,15 @@ for i = 1:wordCount
   end 
 	
   %todo keep track of 0s and 1s because they mean a Certain answer to the question!
-  if index - 2 > 0
-    m_1 = mean(d(2: index-1))
-    upperLimit = index-1;
-    for i= 2:upperLimit
-      d(i) = m_1;
-    end
-  end  
+%  if index - 2 > 0
+%    m_1 = mean(d(2: index-1))
+%    upperLimit = index-1;
+%    for i= 2:upperLimit
+%      if (d(i) ~= 1 && d(i) ~= 0)
+%        d(i) = m_1;
+%      end  
+%    end
+%  end  
   
 
 
@@ -83,4 +88,5 @@ end
 
 %saving answers to a file
 answers = d;
-save answers.mat answers;
+m = value;
+save answers.mat answers m;
