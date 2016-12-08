@@ -12,20 +12,18 @@ else
   count = c;
 end
 
-%F = words{:,1};
-
 if exist("answers.mat", 'file') == 2
   d = importdata("answers.mat");
-  %d = answers.a;
 else
-  m = max(count);
-  d = count/m;
+  m = (max(count) - min(count)) / 2;
+  d = count / m;
 end
 
-prompt = 'How many words you would want to answer?';
+prompt = 'How many words you would want to answer: ';
 wordCount = input(prompt);
 
 for i = 1:wordCount
+  %plotting
   figure(1);
   plot (count, d, "*", "markersize", 7);
   hold;
@@ -33,10 +31,12 @@ for i = 1:wordCount
 
   %find value closest to 0.5
   %which means uncertainty
-  [c index] = min(abs(d-0.5));
-  closestValues = d(index) ;
-  display(d(index));
-  display(words(index));
+  value = (max(d) - min(d))/2;
+  fprintf('Looking for closest to %f \n', value);
+  
+  [c index] = min(abs(d - value));
+  
+  fprintf('The word is "%s"\n', words{index,1});
   userAsnwered = false;
   
   while ~userAsnwered  
