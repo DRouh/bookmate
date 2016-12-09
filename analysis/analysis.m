@@ -1,59 +1,25 @@
 clear ; close all; clc
-pkg load signal;
+pkg load signal;  
+#pkg load splines;
 
-if exist("data.mat", 'file') == 2
-  fprintf('Loading data....\n');
-  data = importdata("data.mat");
-  words = data.w;
-  count = data.c;
-else
-  [w, c] = textread('short.txt', '%s %f', 'delimiter' , ' ', 2);
-  save data.mat w c
-  words = w;
-  count = c;
-end
+%loading data (words and count), vector of probability (d) and m (mean value to consider)
+[words,count, p, v] = loadData("data.mat", "short.txt");
 
-if exist("answers.mat", 'file') == 2
-  data = importdata("answers.mat");
-  d = data.answers;
-  m = data.m;
-  d(1) = 1;
-else
-  m = (max(count) - min(count));
-  d = count / m;
-  d(1) = 1;
-  m = (max(d)-min(d))/2;
-end
 prompt = 'How many words you would want to answer: ';
 wordCount = input(prompt);
-value = m / 2;
+value = v / 2;
 
 %positioning figure on display
-ss = get(0,'screensize'); %The screen size
-width = ss(3);
-height = ss(4);
-H = figure;
-set(H,"visible","on");
-vert = 400; %300 vertical pixels
-horz = 550; %600 horizontal pixels
-%This will place the figure in the top-right corner
-set(H,'Position',[width-horz-50, height-vert-100, horz, vert]);
+H = prepareFigure();
 
 for i = 1:wordCount
-  %plotting
-  plot (count, d, "o", "markersize", 7);
-  hold;
-  plot (count, d, 'linewidth', 2);
-  plot (count, medfilt1(d, 10), 'linewidth', 3);
-
-  
   fprintf('Looking for closest to %f \n', value);
-  [c index] = min(abs(d - value));
-  fprintf('The word is "%s"\n', words{index,1});
+  [c index] = min(abs(p - value));
+  fprintf('The word is "%s"\n', words{index, 1});
   
-  plot(count(index), d(index),'LineWidth',2, "gx", "markersize", 15)
-  legend ("normailzed count","probability locus","median filter", "current question");
-  
+  %plotting
+  plotData(count, p, value, index)
+ 
   %accept user's input
   userAsnwered = false;
   while ~userAsnwered  
@@ -62,40 +28,33 @@ for i = 1:wordCount
 
     if (x == 1) 
       userAsnwered = true;
-      d(index) = 1;   
+      p(index) = 1;   
     elseif (x == 0)
       userAsnwered = true;
-      d(index) = 0;
+      p(index) = 0;
     end
-    
-    if i ~= wordCount
-      clf;
-    end  
   end 
 	
-  %todo keep track of 0s and 1s because they mean a Certain answer to the question!
-%  if index - 2 > 0
-%    m_1 = mean(d(2: index-1))
-%    upperLimit = index-1;
-%    for i= 2:upperLimit
-%      if (d(i) ~= 1 && d(i) ~= 0)
-%        d(i) = m_1;
-%      end  
-%    end
-%  end  
+  %min - for the words with the greatest count
+  %max - for the words with the smallest count
   
-  %modify distibution?
-
-  newMinIndexOfLastKnown = min(find(d ~= 1 & d ~= 0)); 
-  newMinIndexOfLastKnown
-  d(newMinIndexOfLastKnown)
-  d(max(find(d ~= 1 & d ~= 0)))
-
-  newMax = d(newMinIndexOfLastKnown)-min(d);
-  value = (newMax)/2;
+  %find poin near which we seek next word to ask
+  unansweredWordProbabilities = find(p ~= 1 & p ~= 0); 
+  unansweredProbs = p(unansweredWordProbabilities);
+  
+  minMaxDiff = abs(min(unansweredProbs)-max(unansweredProbs)); 
+  minMaxDiff2 = abs(mode(unansweredProbs)-max(unansweredProbs));
+  
+  %value = mode(p(unansweredWordProbabilities));
+  value = minMaxDiff / 2;
 end  
 
 %saving answers to a file
-answers = d;
-m = value;
-save answers.mat answers m;
+answers = p;
+v = value;
+save answers.mat answers v;
+
+%todo
+%1. remove median filter at all
+%2. spline or polynom of 2 pow over points that were answered
+
