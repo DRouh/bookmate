@@ -20,14 +20,13 @@ function [words, count, p, v] = loadData(dataFileName, textFileName)
     p = data.answers;
     v = data.v;
     p(1) = 1; %because octave calcs it tob be 1.01
-    p(end) = 0;
   else
     %m - is the point (word) that we want answer for
     v = (max(count) - min(count));
     %normalize counts to reflet probability
     p = count / v;
     p(1) = 1;%because octave calcs it tob be 1.01
-    p(end) = 0;
+    
     v = (max(p)-min(p))/2;
   end
 endfunction
