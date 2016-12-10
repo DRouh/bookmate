@@ -1,5 +1,4 @@
 function yy = runningAverage(x, y, windowSize)
-    display(length(x));
     if length(x) >= windowSize
       n = windowSize;
       m = (n - 1) / 2;
