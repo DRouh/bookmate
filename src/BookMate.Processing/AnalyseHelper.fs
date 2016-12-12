@@ -67,7 +67,7 @@ module AnalyseHelper =
         else words
     
     let getPosTagger = 
-        let jarRoot = @"d:\downloads\stanford-postagger-2014-08-27"
+        let jarRoot = BookMate.Core.Configuration.getStanfordModelFolder //@"d:\downloads\stanford-postagger-2014-08-27"
         let modelsDirectory = jarRoot + @"\models"
         let tagger = new MaxentTagger(modelsDirectory + @"\english-bidirectional-distsim.tagger")
         tagger

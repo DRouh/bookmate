@@ -4,3 +4,4 @@ obj
 /bookmate/Settings.FSharpLint
 .vs
 /bookmate/packages
+packages

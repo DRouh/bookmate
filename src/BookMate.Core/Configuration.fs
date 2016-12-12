@@ -7,3 +7,4 @@ module Configuration =
     let getYandexDictionaryApiKey = ""
     let getDBConnectionString = "" |> System.IO.Path.GetFullPath
     let getUserDefinedWordsFilePath = @""
+    let getStanfordModelFolder = @""
