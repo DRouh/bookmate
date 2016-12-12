@@ -21,17 +21,20 @@ module AnalyseHelper =
         
         let stat = 
             taggedWords
-            |> Array.Parallel.collect ((fun x -> 
-                                       updateDownloadProgress()
-                                       tagger.tagSentence(x :?> ArrayList).toArray())
-                                       >> Array.map (string))
-            |> Array.Parallel.choose ((fun x -> x |> (split ([| '/' |]))) >> (function 
-                                      | [| word; tag |] -> 
-                                          match matchStanfordPoS tag with
-                                          | Some t -> Some(word, t)
-                                          | _ -> None
-                                      | _ -> None))
-        
+            |> Array.Parallel.collect (fun x -> 
+                   updateDownloadProgress()
+                   let taggedWords = tagger.tagSentence(x :?> ArrayList).toArray()
+                   let taggedStrings = taggedWords |> Array.map (string)
+                   taggedStrings)
+            |> Array.Parallel.choose (fun x -> 
+                   let wordTag = x |> (split ([| '/' |]))
+                   match wordTag with
+                   | [| word; tag |] -> 
+                       match matchStanfordPoS tag with
+                       | Some t -> Some(word, t)
+                       | _ -> None
+                   | _ -> None)        
+
         printf "\rTagging:%i%%" 100
         stat
     
@@ -50,9 +53,8 @@ module AnalyseHelper =
                        | _ -> None
                    | _ -> None)
             |> Array.groupBy (id)
-            |> Array.Parallel.map 
-                   ((fun (key, values) -> (key, values.Length)) >> fun ((x, z), c) -> (x, z |> Array.ofList, c))
-            |> Array.sortByDescending (fun (k, z, c) -> c)
+            |> Array.Parallel.map (fun ((w, ts), _) -> w, ts |> Array.ofList, ts.Length)
+            |> Array.sortByDescending (fun (_, _, c) -> c)
         stat
     
     let textToWords omitPunctuation text = 

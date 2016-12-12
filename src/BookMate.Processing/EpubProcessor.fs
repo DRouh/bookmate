@@ -58,7 +58,7 @@ module EpubProcessor =
                         else
                             let translationsForExactPos = v |> Array.where (fun (p, _) -> commonPos |> List.contains p)
                             let choice = if Seq.isEmpty translationsForExactPos then v else translationsForExactPos
-                            let translationsToUse = choice|> Array.map (fun (_, t) -> t) |> Seq.truncate 3 |> Array.ofSeq |> Array.reduce (StringHelper.stringify)
+                            let translationsToUse = choice |> Array.map (snd) |> Seq.truncate 3 |> Array.ofSeq |> Array.reduce (StringHelper.stringify)
                             let pattern = @"\b" + word + @"\b"
                             let replace = word + "{" + translationsToUse + "}"
                             processedText <- RegexHelper.regexReplace text pattern replace
@@ -132,11 +132,11 @@ module EpubProcessor =
         let userDefinedWords = loadUserDefinedWords //load words that user explicitly asked to translate
         let translationsToQuery = 
             wordStat 
-            |> Array.Parallel.map (fun (x, y, z) -> x) 
+            |> Array.Parallel.map (fun (x, _, _) -> x) 
             |> Array.where (fun x -> x.Length >= 3)
             |> Array.append (userDefinedWords)
             |> Array.distinct
-            |> Array.except (dbDictionary |> Array.map (fun (x, y, z) -> x) |> Array.distinct) 
+            |> Array.except (dbDictionary |> Array.map (fun (x, _, _) -> x) |> Array.distinct) 
 
         let queriedTranslations = TranslationDownloadHelper.downloadDictionaryTranslations <| translationsToQuery 
         //save queried translations

@@ -2,6 +2,7 @@
 module TranslationDownloadHelper =
     open BookMate.Core.Helpers
     open BookMate.Integration
+    open BookMate.Core.Helpers.StringHelper
 
     let downloadSingleTranslations (toQuery : string []) = 
         let chunkSize = 30
@@ -13,29 +14,26 @@ module TranslationDownloadHelper =
             a <- a + 1
             printf "\rDownloading translations:%i%%" (int (100.0f * (float32 a / progress)))
         
-        let splitByChuncks = 
-            Array.chunkBySize chunkSize
-            >> Array.map (Array.reduce StringHelper.stringify)
-            >> Array.ofSeq
+        let splitByChuncks = Array.chunkBySize chunkSize >> Array.map (Array.reduce stringify)
+        let downloadTranslations = 
+            Array.Parallel.map (fun w -> 
+                let ts = (YandexHelper.askYaTranslateAsyncf <| w <| updateDownloadProgress) |> Async.RunSynchronously
+                w, ts)
         
-        let asyncParalleldownload = 
-            Array.Parallel.mapi 
-                (fun i p -> (p, (YandexHelper.askYaTranslateAsyncf p updateDownloadProgress) |> Async.RunSynchronously))
-        
-        let form (arg : (string * string []) []) = 
+        let flatten (arg : (string * string []) []) = 
             arg
-            |> Array.Parallel.map (fun (p, a) -> (StringHelper.unstringify p, a))
-            |> Array.Parallel.map (fun (p, a) -> (p, a, p.Length = a.Length))
-            |> Array.Parallel.map (fun (p, a, se) -> 
-                   if (se) then (Seq.zip p a)
-                   else Seq.empty<string * string>)
-            |> Seq.concat
-            |> Array.ofSeq
+            |> Array.Parallel.choose (fun (p, a) -> 
+                   let ss = unstringify <| p
+                   match ss.Length = a.Length with
+                   | true -> Some(ss |> Array.zip a)
+                   | _ -> None)
+            |> Array.concat
+              
         printfn ""
         toQuery
         |> splitByChuncks
-        |> asyncParalleldownload
-        |> form
+        |> downloadTranslations
+        |> flatten
    
     let downloadDictionaryTranslations (toQuery : string []) = 
         //progress update
@@ -47,17 +45,17 @@ module TranslationDownloadHelper =
             a <- a + 1
             printf "\rDownloading dictionary translations:%i%%" (int (100.0f * (float32 a / progress)))
         
-        let asyncParalleldownload = 
-            Array.Parallel.map (fun p -> (p, (YandexHelper.askYaDictionaryAsyncf p updateDownloadProgress) |> Async.RunSynchronously))
-        
-        let oneToMany (ys : (string*string)[]) (x : string) = 
-            x
-            |> Array.replicate ys.Length
-            |> Array.zip ys
+        let downloadTranslations = 
+            Array.Parallel.map (fun w -> 
+                let ts = (YandexHelper.askYaDictionaryAsyncf <| w <| updateDownloadProgress) |> Async.RunSynchronously
+                w, ts)
+
+        let oneToMany (ys : 'a[]) = 
+            Array.replicate ys.Length
+            >> Array.zip ys
 
         printfn ""
         toQuery
-        |> asyncParalleldownload
-        |> Array.Parallel.map (fun (x, y) -> oneToMany y x)
-        |> Array.concat
+        |> downloadTranslations
+        |> Array.Parallel.collect (fun (x, y) -> oneToMany y x)
         |> Array.Parallel.map (fun ((pos, ru), eng) -> (eng, pos, ru))
