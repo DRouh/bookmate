@@ -4,8 +4,8 @@ module Program =
     open System.IO
     open BookMate.Processing
     
-    let rec getBookPath arg = 
-        match arg with
+    let rec getBookPath = 
+        function
         | [||] | [| "" |] | [| null |] -> 
             printf @"Please type in the file path (w/o """"): "
             let bookPath = System.Console.ReadLine()

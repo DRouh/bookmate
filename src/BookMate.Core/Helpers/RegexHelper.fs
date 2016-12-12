@@ -7,9 +7,9 @@ module RegexHelper =
         if (m.Success) then Some m.Groups.[1].Value
         else None
     
-    let wordFilter str = 
-        match str with
-        | Regex @"^[a-z']*$" v -> Some str
+    let wordFilter = 
+        function
+        | Regex @"^[a-z']*$" v -> Some v
         | _ -> None
     
     let isMatch pattern str =

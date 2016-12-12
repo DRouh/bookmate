@@ -13,24 +13,24 @@ module EpubProcessor =
     let private prepareStatForExport = Array.Parallel.map (fun (w, p, c) -> sprintf "%s %A %i %s" w p c System.Environment.NewLine) >> String.concat (@"")
     let private prepareNewTranslationsForExport = Array.Parallel.map (fun (w, p,s) -> sprintf "%s, %s, %s %s" w p s System.Environment.NewLine) >> String.concat (@"")
 
-    let private loadBook bookPath = 
-        match bookPath with
+    let private loadBook = 
+        function
         | "" | null -> failwith "Can't use empty file path to load the book"
         | path -> 
             match File.Exists(path) with
             | true -> 
                 let fileName = getFileNameWithoutExtension path
-                let book = EpubReader.Read(bookPath)
+                let book = EpubReader.Read(path)
                 let text = book.ToPlainText()
                 printfn "Loaded %s" fileName
                 text
             | _ -> failwith "File does not exist."
     
-    let tryFind (word:string) (lookup:(string*(CommonPoS*string)[])[]) =
+    let tryFind (lookup:(string*('a*'b)[])[]) word =
         lookup |> Array.where (fun (e, _) -> e = word) |> Seq.tryHead
 
-
-    let processText (posTagger) (dict:(string*(CommonPoS*string)[])[]) (text:string) = 
+    let processText posTagger dict (text:string) = 
+        let findInDic = tryFind dict
         match text.Trim() with 
         | null | "" | "\r" | "\r\n" | "\n" -> text
         | _ ->
@@ -39,7 +39,7 @@ module EpubProcessor =
             let translations = 
                 wordsToCheck
                 |> Array.Parallel.choose (fun w -> 
-                       match tryFind w dict with
+                       match findInDic w with
                        | Some t -> Some(t)
                        | _ -> None)
                 |> Map.ofArray
@@ -62,7 +62,7 @@ module EpubProcessor =
                             let pattern = @"\b" + word + @"\b"
                             let replace = word + "{" + translationsToUse + "}"
                             processedText <- RegexHelper.regexReplace text pattern replace
-                    | None -> ()
+                    | _ -> ()
             processedText 
 
     let convertPosForArray = 
