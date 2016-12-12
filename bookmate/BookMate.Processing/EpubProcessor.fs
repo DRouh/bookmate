@@ -35,14 +35,15 @@ module EpubProcessor =
         | null | "" | "\r" | "\r\n" | "\n" -> text
         | _ ->
             let paragraph = text
-            let wordsToCheck = textToWords <| true <| paragraph 
+            let wordsToCheck = textToWords <| true <| paragraph           
             let translations = 
-                wordsToCheck 
-                |> Array.Parallel.map (fun w -> (w, tryFind w dict)) 
-                |> Array.where (fun (_, x) -> x.IsSome)
-                |> Array.Parallel.map (fun (_, x)  -> x.Value)
+                wordsToCheck
+                |> Array.Parallel.choose (fun w -> 
+                       match tryFind w dict with
+                       | Some t -> Some(t)
+                       | _ -> None)
                 |> Map.ofArray
-            
+
             let taggedWords = tagWords posTagger paragraph//todo refactor this to return common pos 
             let mutable processedText = text
             for (word, pos) in taggedWords do
@@ -64,10 +65,11 @@ module EpubProcessor =
                     | None -> ()
             processedText 
 
-    let convertPosForArray  =
-        Array.Parallel.map (fun (e, pS, r) -> (e, matchCommonPos pS, r))
-        >> Array.where (fun (_, p, _) -> p.IsSome)
-        >> Array.Parallel.map  (fun (e, p, r) -> (e, p.Value, r))
+    let convertPosForArray = 
+        Array.Parallel.choose (fun (e, pS, r) -> 
+            match matchCommonPos pS with
+            | Some p -> Some(e, p, r)
+            | _ -> None)
 
     let formDictionaryForBook (userDefinedWords:string[]) wordStat queriedTranslations (dbDictionary:(string*CommonPoS*string)[]) =
         let numOfTranslationsToUse = 3
@@ -89,15 +91,10 @@ module EpubProcessor =
             res |> Seq.truncate numOfTranslationsToUse |> Array.ofSeq |> Array.map (fun (e,p,s) -> (p,s))
 
         let look = lookupWord <| (trans |> Array.append (dbDictionary) |> Array.distinct)
-        let oneToMany (ys:'a[]) x = 
-            x
-            |> Array.replicate ys.Length
-            |> Array.zip ys
 
         let translatedWords = 
             wordsToTranslate 
             |> Array.Parallel.map (fun (eng, pos, _) -> (eng, pos, look <| eng <| pos))
-            //|> Array.Parallel.map (fun (e, _, trs) -> (oneToMany trs e))
             |> Array.Parallel.map (fun (e, _, trs) -> (e, trs))
         translatedWords
 
@@ -125,7 +122,7 @@ module EpubProcessor =
         let dbDictionary = BookMate.Integration.DBHelper.loadFromDB |> convertPosForArray
 
         //get book statistics
-        let wordStat = AnalyseHelper.getWordStats2 posTagger text
+        let wordStat = AnalyseHelper.getWordStats posTagger text
 
         //save book statistics
         let statToExport' = wordStat |> prepareStatForExport
@@ -140,8 +137,6 @@ module EpubProcessor =
             |> Array.append (userDefinedWords)
             |> Array.distinct
             |> Array.except (dbDictionary |> Array.map (fun (x, y, z) -> x) |> Array.distinct) 
-            |> Seq.truncate 0 //todo remove this
-            |> Array.ofSeq //todo remove this
 
         let queriedTranslations = TranslationDownloadHelper.downloadDictionaryTranslations <| translationsToQuery 
         //save queried translations
