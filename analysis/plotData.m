@@ -28,19 +28,37 @@ function plotData(count, p, value, index, closestY)
   %running average plot
   
   windowSize = 5;
-  if length(sy) >= windowSize
-    subplot(2,1,2);
+  leg = '';
+  if length(sy) >= windowSize 
+    subplot(2, 1, 2);
     yy = runningAverage(sy, sy, windowSize);
     plot(sx,yy, 'linewidth', 2, '--');
     hold;
-    %fitting polynomial
-    deg = min(windowSize, length(x));
-    polynY = fitPoly(length(p), sx, sy, deg);
-    plot(sx, polynY, ":k",'LineWidth', 2)
-    title('Vocabulary estimate');
-    xlabel('Indices of ranked words') % x-axis label
-    ylabel('Probability of knowing') % y-axis label
-    legend ("running average", "fitted polynomial");
+    
+    raLeg=true;
   end
+  
+  if length(sx) >= 2  
+    subplot(2, 1, 2);
+    %fitting polynomial
+    deg = 2;
+    polynY = fitPoly(length(p), sx, sy, deg);
+    plot(sx, polynY, ":k",'LineWidth', 2);
+    
+    fpLeg = true;
 
+  end
+  if length(sy) >= windowSize  || length(sx) >= 2 
+    title('Vocabulary estimate');
+    xlabel('Indices of ranked words');
+    ylabel('Probability of knowing');
+    
+    if exist('fpLeg') && exist('raLeg')
+      legend('running average', 'fitted polynomial');
+    elseif exist('fpLeg')
+      legend( 'fitted polynomial');
+    elseif exist('fpLeg')
+      legend('running average');
+    end   
+  end  
 endfunction
