@@ -22,7 +22,11 @@ module.exports = {
   module: {
     loaders: [
       { test: /\.html$/, loader: 'raw' },
-      { test: /\.ts$/, loader: 'ts-loader' }
+      {
+        test: /\.ts$/,
+        loaders: ['awesome-typescript-loader', 'angular2-template-loader'],
+        exclude: [/\.(spec|e2e)\.ts$/]
+      }
     ],
     noParse: [path.join(__dirname, 'node_modules', 'angular2', 'bundles')]
   },
