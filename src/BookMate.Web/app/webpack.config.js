@@ -5,13 +5,11 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const DefinePlugin = require('webpack/lib/DefinePlugin');
 
 const ENV = process.env.NODE_ENV = 'development';
-const BASEPATH = process.env.BASEPATH = 'BookMate.Web';
 const HOST = process.env.HOST || 'localhost';
 const PORT = process.env.PORT || 8080;
 
 const metadata = {
   env: ENV,
-  basepath: BASEPATH,
   host: HOST,
   port: PORT
 }
@@ -21,7 +19,6 @@ module.exports = {
     contentBase: 'src',
     historyApiFallback: true,
     host: metadata.host,
-    baseURL: 'BookMate.Web',
     port: metadata.port
   },
   entry: {
