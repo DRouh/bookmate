@@ -1,0 +1,33 @@
+{
+  "version": "1.0.0-*",
+  "buildOptions": {
+    "debugType": "portable",
+    "compilerName": "fsc",
+    "compile": {
+      "includeFiles": [
+        "POSHelper.fs",
+        "TranslationDownloadHelper.fs",
+        "AnalyseHelper.fs",
+        "EpubProcessor.fs"
+      ]
+    }
+  },
+  "tools": {
+    "dotnet-compile-fsc": "1.0.0-preview2-*"
+  },
+  "frameworks": {
+    "netstandard1.6": {
+      "dependencies": {
+        "NETStandard.Library": "1.6.0",
+        "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-160629",
+        "System.IO": "*",
+        "System.IO.Compression": "*",
+        "BookMate.Core": "*",
+        "BookMate.Integration": "*"
+      }
+    }
+  },
+  "dependencies": {
+    "HtmlAgilityPack.NetCore": "1.5.0.1"
+  }
+}

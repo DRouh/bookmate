@@ -3,7 +3,6 @@
 module EpubProcessor = 
     open BookMate.Core.Helpers.IOHelper
     open BookMate.Helpers
-    open EpubSharp
     open HtmlAgilityPack
     open System.IO
     open BookMate.Helpers.AnalyseHelper
@@ -15,16 +14,18 @@ module EpubProcessor =
 
     let private loadBook = 
         function
-        | "" | null -> failwith "Can't use empty file path to load the book"
-        | path -> 
-            match File.Exists(path) with
-            | true -> 
-                let fileName = getFileNameWithoutExtension path
-                let book = EpubReader.Read(path)
-                let text = book.ToPlainText()
-                printfn "Loaded %s" fileName
-                text
-            | _ -> failwith "File does not exist."
+        | _ -> ""
+        // function
+        // | "" | null -> failwith "Can't use empty file path to load the book"
+        // | path -> 
+        //     match File.Exists(path) with
+        //     | true -> 
+        //         let fileName = getFileNameWithoutExtension path
+        //         let book = EpubReader.Read(path)
+        //         let text = book.ToPlainText()
+        //         printfn "Loaded %s" fileName
+        //         text
+        //     | _ -> failwith "File does not exist."
     
     let tryFind (lookup:(string*('a*'b)[])[]) word =
         lookup |> Array.where (fun (e, _) -> e = word) |> Seq.tryHead
@@ -119,7 +120,7 @@ module EpubProcessor =
         let posTagger = getPosTagger
         
         //load dictionary from database
-        let dbDictionary = BookMate.Integration.DBHelper.loadFromDB |> convertPosForArray
+        let dbDictionary = [|("", Adjective, "")|]  //BookMate.Integration.DBHelper.loadFromDB |> convertPosForArray
 
         //get book statistics
         let wordStat = AnalyseHelper.getWordStats posTagger text
@@ -144,6 +145,7 @@ module EpubProcessor =
         do IOHelper.writeToFile (path +/ (sprintf "%s-translations.txt" fileName)) preparedForSavingTranslations
         
         //form dictionary for the book
+
         let dictionaryForBook = formDictionaryForBook userDefinedWords wordStat queriedTranslations dbDictionary
         
         //IO operations - creatint tmp folder, unzipping file,...
@@ -191,7 +193,9 @@ module EpubProcessor =
             let html = new HtmlAgilityPack.HtmlDocument()
             html.OptionWriteEmptyNodes <- true
             html.OptionOutputAsXml <- true
-            do html.Load(processingFileName, System.Text.Encoding.UTF8)
+            
+            use reader = System.IO.File.OpenText(processingFileName)
+            do html.Load(reader)
             let textNodes = html.DocumentNode.SelectNodes("//p//text()")
             
             if not (isNull textNodes) then 
@@ -222,3 +226,8 @@ module EpubProcessor =
         printfn "Cleaning up tmp folder."
         do deleteFiles tmpPath "*.*" true true
         printfn "The book has been processed."
+
+
+//Bootstrap project where all DI will be wired
+//Extract book analysis from main routine and create it as separate service
+//Separate database access functionality from implementation and current database

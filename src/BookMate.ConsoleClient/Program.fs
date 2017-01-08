@@ -3,7 +3,8 @@
 module Program = 
     open System.IO
     open BookMate.Processing
-    
+    open BookMate.Core
+
     let rec getBookPath = 
         function
         | [||] | [| "" |] | [| null |] -> 
@@ -29,6 +30,6 @@ module Program =
     let main argv = 
         let bookPath = getBookPath <| argv
         let processBook = chooseBookProcessor bookPath 
-        do processBook bookPath
+        //do processBook bookPath
         System.Console.Read() |> ignore
         0
