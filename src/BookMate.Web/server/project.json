@@ -12,6 +12,11 @@
         "Startup.fs",
         "Program.fs"
       ]
+    },
+    "copyToOutput": {
+      "mappings": {
+        "appconfiguration.json": "../../BookMate.Core/appconfiguration.json"
+      }
     }
   },
 

@@ -10,7 +10,8 @@
         "Helpers/StringHelper.fs",
         "Configuration.fs"
       ]
-    }
+    },
+    "copyToOutput": { "includeFiles": [ "appconfiguration.json" ] }
   },
   "tools": {
     "dotnet-compile-fsc": "1.0.0-preview2-*"
@@ -26,6 +27,7 @@
     }
   },
   "dependencies": {
-    "System.Text.RegularExpressions": "4.3.0"
+    "System.Text.RegularExpressions": "4.3.0",    
+    "Newtonsoft.Json": "9.0.1"
   }
 }

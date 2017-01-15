@@ -3,28 +3,39 @@
   "buildOptions": {
     "debugType": "portable",
     "emitEntryPoint": true,
+    "warningsAsErrors": true,
     "compilerName": "fsc",
     "compile": {
       "includeFiles": [
         "Program.fs"
       ]
+    },
+    "copyToOutput": {
+      "mappings": {
+        "appconfiguration.json": "../BookMate.Core/appconfiguration.json"
+      }
     }
   },
   "tools": {
     "dotnet-compile-fsc": "1.0.0-preview2-*"
   },
   "frameworks": {
-    "netcoreapp1.0": {
+    "netcoreapp1.1": {
       "dependencies": {
         "Microsoft.NETCore.App": {
-          "type": "platform",
           "version": "1.1.0"
         },
         "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-160629",
         "BookMate.Core": "*",
-        "BookMate.Processing": "*"
+        "BookMate.Processing": "*",
+        "BookMate.Integration": "*"
       }
     }
   },
-  "dependencies": {}
+  "dependencies": {
+    "System.Net.Http": "4.3.0"
+  },
+  "runtimes": {
+    "win7-x64": {}
+  }
 }

@@ -5,3 +5,11 @@ obj
 .vs
 /bookmate/packages
 packages
+/src/BookMate.Core/appconfiguration.xml
+/src/BookMate.Web/app/.vscode
+/src/BookMate.Web/app_built
+/src/BookMate.Web/node_modules
+/src/BookMate.Web/public
+project.lock.json
+/src/BookMate.Core/appconfiguration.json
+/analysis/data.mat

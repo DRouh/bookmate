@@ -1,0 +1,9 @@
+﻿{
+  "YandexTranslateApiEndPoint": "",
+  "YandexTranslateApiKey": "",
+  "YandexDictionaryApiEndPoint": "",
+  "YandexDictionaryApiKey": "",
+  "DBConnectionString": "",
+  "UserDefinedWordsFilePath": "",
+  "StanfordModelFolder": ""
+}
