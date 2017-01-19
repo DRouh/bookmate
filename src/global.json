@@ -1,6 +1,10 @@
 {
   "projects": [
-    "BookMate.Core","BookMate.Ingegration","BookMate.Web", "BookMate.ConsoleClient"
+    "BookMate.Core",
+    "BookMate.Ingegration",
+    "BookMate.Web",
+    "BookMate.ConsoleClient",
+    "tests"
   ],
   "sdk": {
     "version": "1.0.0-preview2-1-003177"
