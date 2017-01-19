@@ -19,11 +19,11 @@
         "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-160629",
         "System.IO": "*",
         "System.IO.Compression": "*",
-        "BookMate.Core": "*"
+        "System.Text.RegularExpressions": "4.3.0"
       }
     }
   },
   "dependencies": {
-    "System.Text.RegularExpressions": "4.3.0"
+    "BookMate.Core": "*"
   }
 }

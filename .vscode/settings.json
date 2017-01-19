@@ -11,6 +11,9 @@
     "**/*.js.map": true,
     "**/*.js": {"when": "$(basename).ts"},
     "**/packages":true,
-    "*.sln":true
+    "*.sln":true,
+    "analysis":true,
+    "database":true,
+    ".gitignore": true
   }
 }

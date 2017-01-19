@@ -28,8 +28,11 @@ module Program =
     
     [<EntryPoint>]
     let main argv = 
-        let bookPath = getBookPath <| argv
-        let processBook = chooseBookProcessor bookPath 
+        //let bookPath = getBookPath <| argv
+        //let processBook = chooseBookProcessor bookPath 
         //do processBook bookPath
+
+        let paragraph = "Mr. & Mrs. Smith is a 2005 American romantic comedy action film. The film stars Brad Pitt and Angelina Jolie as a bored upper-middle class married couple. They are surprised to learn that they are both assassins hired by competing agencies to kill each other.";
+        printfn "%A" paragraph
         System.Console.Read() |> ignore
         0

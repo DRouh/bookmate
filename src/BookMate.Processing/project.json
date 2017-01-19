@@ -22,12 +22,13 @@
         "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-160629",
         "System.IO": "*",
         "System.IO.Compression": "*",
-        "BookMate.Core": "*",
-        "BookMate.Integration": "*"
+        "HtmlAgilityPack.NetCore": "1.5.0.1"
+        
       }
     }
   },
   "dependencies": {
-    "HtmlAgilityPack.NetCore": "1.5.0.1"
+    "BookMate.Core": "*",
+    "BookMate.Integration": "*"
   }
 }

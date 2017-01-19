@@ -12,7 +12,11 @@
   "dependencies": {
     "xunit":"2.2.0-beta5-*",
     "FsUnit.Xunit":"2.3.0-*",
-    "dotnet-test-xunit":"2.2.0-preview2-*"
+    "dotnet-test-xunit":"2.2.0-preview2-*",
+    "BookMate.Core": {
+      "version":"1.0.0",
+      "type":"build"
+    }
   },
   "tools": {
     "xunit.runner.console":"2.1.0",
@@ -28,10 +32,10 @@
   "frameworks": {
     "netcoreapp1.1": {
       "dependencies": {
-        "Microsoft.FSharp.Core.netcore":"1.0.0-alpha-160629",
         "Microsoft.NETCore.App": {
           "version": "1.1.0"
-        }
+        },
+        "Microsoft.FSharp.Core.netcore":"1.0.0-alpha-160629"
       },
       "imports": [
         "portable-net451+win81",

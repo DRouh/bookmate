@@ -25,15 +25,15 @@
         "Microsoft.NETCore.App": {
           "version": "1.1.0"
         },
-        "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-160629",
-        "BookMate.Core": "*",
-        "BookMate.Processing": "*",
-        "BookMate.Integration": "*"
+        "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-160629"
       }
     }
   },
   "dependencies": {
-    "System.Net.Http": "4.3.0"
+    "System.Net.Http": "4.3.0",
+    "BookMate.Core": "*",
+    "BookMate.Processing": "*",
+    "BookMate.Integration": "*"
   },
   "runtimes": {
     "win7-x64": {}
