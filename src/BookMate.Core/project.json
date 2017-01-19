@@ -11,7 +11,11 @@
         "Configuration.fs"
       ]
     },
-    "copyToOutput": { "includeFiles": [ "appconfiguration.json" ] }
+    "copyToOutput": {
+      "includeFiles": [
+        "appconfiguration.json"
+      ]
+    }
   },
   "tools": {
     "dotnet-compile-fsc": "1.0.0-preview2-*"
@@ -20,14 +24,14 @@
     "netstandard1.6": {
       "dependencies": {
         "NETStandard.Library": "1.6.0",
-        "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-160629",
+        "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-161205",
         "System.IO": "*",
         "System.IO.Compression": "*"
       }
     }
   },
   "dependencies": {
-    "System.Text.RegularExpressions": "4.3.0",    
+    "System.Text.RegularExpressions": "4.3.0",
     "Newtonsoft.Json": "9.0.1"
   }
 }

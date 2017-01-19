@@ -18,13 +18,12 @@
   "frameworks": {
     "netstandard1.6": {
       "dependencies": {
+        "HtmlAgilityPack.NetCore": "1.5.0.1",
         "NETStandard.Library": "1.6.0",
-        "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-160629",
         "System.IO": "*",
-        "System.IO.Compression": "*",
-        "HtmlAgilityPack.NetCore": "1.5.0.1"
-        
-      }
+        "System.IO.Compression": "*"
+      },
+      "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-161205"
     }
   },
   "dependencies": {

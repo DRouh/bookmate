@@ -1,26 +1,27 @@
-﻿namespace SampleTest
-open Xunit
-open FsUnit.Xunit
+﻿namespace BookMate
 
 module CommonTest = 
-    type Point3D = {
-      x: float
-      y: float
-      z: float  
-    }
-    let (==) = LanguagePrimitives.PhysicalEquality
-    let inline (!=) a b = not (a == b)
-    
-    let a = {x = 1.0; y = 2.0; z = 3.0}
-    let b = {x = 1.0; y = 2.0; z = 3.0}
-    let c = a 
-    
+    open Xunit
+    open FsUnit.Xunit
+    open BookMate.Core.Configuration
+
+    let expectedConfiguration () : ApplicationConfiguration = 
+        {
+            YandexTranslateApiEndPoint="1234"
+            YandexTranslateApiKey="12345"
+            YandexDictionaryApiEndPoint="1234"
+            YandexDictionaryApiKey="1234"
+            DBConnectionString="1234"
+            UserDefinedWordsFilePath="1234"
+            StanfordModelFolder="1234"
+        }
+
     [<Fact>]
-    let ``== operator should show physical equality from two references``() =
-        (a == b) |> should be False
-        (a == c) |> should be True
-    
-    [<Fact>]
-    let ``!= operator should show physical inequality of two references``() =
-        (a != b) |> should be True
-        (a != c) |> should be False
+    let ``Configuration test`` () = 
+        let expectedConfiguration = expectedConfiguration()
+        expectedConfiguration.YandexTranslateApiEndPoint = "1234" |> should be True 
+        
+        //BookMate.Core.Configuration.testTest() = 3 |> should be True
+        //BookMate.Core.Configuration.applicationConfiguration = BookMate.Core.Configuration.applicationConfiguration |> should be True
+        //1=1 |> should be True
+        //Configuration.applicationConfiguration.getYandexTranslateApiEndPoint = Configuration.applicationConfiguration.getYandexTranslateApiEndPoint

@@ -14,17 +14,25 @@ module Configuration =
         UserDefinedWordsFilePath: string
         StanfordModelFolder: string
     }
+
     let applicationJsonActual = @"appconfiguration.json"
-
-    let private configStr = 
-        Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), applicationJsonActual)
+    let private readJsonConfigurationFromFile jsonFileName  = 
+        Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), jsonFileName)
         |> File.ReadAllText
-    let public config = JsonConvert.DeserializeObject<ApplicationConfiguration>(configStr)
 
-    let getYandexTranslateApiEndPoint = config.YandexTranslateApiEndPoint
-    let getYandexTranslateApiKey = config.YandexTranslateApiKey
-    let getYandexDictionaryApiEndPoint = config.YandexDictionaryApiEndPoint
-    let getYandexDictionaryApiKey = config.YandexDictionaryApiKey
-    let getDBConnectionString = config.DBConnectionString |> System.IO.Path.GetFullPath
-    let getUserDefinedWordsFilePath = config.UserDefinedWordsFilePath
-    let getStanfordModelFolder = config.StanfordModelFolder
+    let private loadJsonConfigurationFromFile = readJsonConfigurationFromFile >> JsonConvert.DeserializeObject<ApplicationConfiguration>
+
+    let applicationLoaderFromJsonFile (jsonFileName) = 
+        jsonFileName |> loadJsonConfigurationFromFile
+
+    let private applicationConfiguration =  lazy(applicationJsonActual |> applicationLoaderFromJsonFile)
+
+    let public getApplicationConfiguration () = applicationConfiguration.Value
+
+    let getYandexTranslateApiEndPoint = getApplicationConfiguration().YandexTranslateApiEndPoint
+    let getYandexTranslateApiKey = getApplicationConfiguration().YandexTranslateApiKey
+    let getYandexDictionaryApiEndPoint = getApplicationConfiguration().YandexDictionaryApiEndPoint
+    let getYandexDictionaryApiKey = getApplicationConfiguration().YandexDictionaryApiKey
+    let getDBConnectionString = getApplicationConfiguration().DBConnectionString |> System.IO.Path.GetFullPath
+    let getUserDefinedWordsFilePath = getApplicationConfiguration().UserDefinedWordsFilePath
+    let getStanfordModelFolder = getApplicationConfiguration().StanfordModelFolder

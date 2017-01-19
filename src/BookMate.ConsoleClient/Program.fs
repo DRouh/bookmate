@@ -21,10 +21,10 @@ module Program =
                 getBookPath [| "" |]
         | _ -> failwith "Sorry. Can't hand these input arguments."
     
-    let chooseBookProcessor (path : string) = 
-        match Path.GetExtension path with
-        | ".epub" -> EpubProcessor.processBook
-        | _ -> failwith "Format isn't supported"
+    //let chooseBookProcessor (path : string) = 
+    //    match Path.GetExtension path with
+    //    | ".epub" -> EpubProcessor.processBook
+    //    | _ -> failwith "Format isn't supported"
     
     [<EntryPoint>]
     let main argv = 

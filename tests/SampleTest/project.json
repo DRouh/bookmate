@@ -1,25 +1,42 @@
 {
-  "version": "0.1.0-*",
   "buildOptions": {
     "emitEntryPoint": false,
     "compilerName": "fsc",
     "compile": {
       "includeFiles": [
-        "Program.fs" 
+        "Program.fs"
       ]
     }
   },
   "dependencies": {
-    "xunit":"2.2.0-beta5-*",
-    "FsUnit.Xunit":"2.3.0-*",
-    "dotnet-test-xunit":"2.2.0-preview2-*",
+    "xunit": "2.2.0-beta5-*",
+    "FsUnit.Xunit": "2.3.0-*",
+    "dotnet-test-xunit": "2.2.0-preview2-*",
     "BookMate.Core": {
-      "version":"1.0.0",
-      "type":"build"
+      "version": "1.0.0",
+      "type": "build"
     }
   },
+  "frameworks": {
+    "netcoreapp1.1": {
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "version": "1.1.0"
+        },
+        "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-161205"
+      },
+      "imports": [
+        "portable-net451+win81",
+        "dnxcore50"
+      ]
+    }
+  },
+  "runtimes": {
+    "win7-x64": {}
+  },
+  "testRunner": "xunit",
   "tools": {
-    "xunit.runner.console":"2.1.0",
+    "xunit.runner.console": "2.1.0",
     "dotnet-compile-fsc": {
       "version": "1.0.0-*",
       "imports": [
@@ -28,23 +45,6 @@
         "netstandard1.3"
       ]
     }
-  },  
-  "frameworks": {
-    "netcoreapp1.1": {
-      "dependencies": {
-        "Microsoft.NETCore.App": {
-          "version": "1.1.0"
-        },
-        "Microsoft.FSharp.Core.netcore":"1.0.0-alpha-160629"
-      },
-      "imports": [
-        "portable-net451+win81",
-        "dnxcore50"
-      ]
-    }
   },
-  "testRunner":"xunit",
-  "runtimes": {
-    "win7-x64": {}
-  }
+  "version": "0.1.0-*"
 }

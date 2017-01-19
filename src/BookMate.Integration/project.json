@@ -15,15 +15,17 @@
   "frameworks": {
     "netstandard1.6": {
       "dependencies": {
+        "BookMate.Core": "*",
         "NETStandard.Library": "1.6.0",
-        "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-160629",
         "System.IO": "*",
-        "System.IO.Compression": "*",
-        "System.Text.RegularExpressions": "4.3.0"
-      }
+        "System.IO.Compression": "*"
+      },
+      "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-161205"
     }
   },
   "dependencies": {
-    "BookMate.Core": "*"
+    "Newtonsoft.Json": "9.0.1",
+    "System.Net.Http": "4.3.0",
+    "System.Text.RegularExpressions": "4.3.0"
   }
 }
