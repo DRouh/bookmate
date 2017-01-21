@@ -9,11 +9,14 @@
     "**/obj": true,
     "**/node_modules": true,
     "**/*.js.map": true,
-    "**/*.js": {"when": "$(basename).ts"},
-    "**/packages":true,
-    "*.sln":true,
-    "analysis":true,
-    "database":true,
-    ".gitignore": true
+    "**/*.js": {
+      "when": "$(basename).ts"
+    },
+    "**/packages": true,
+    "*.sln": true,
+    "analysis": true,
+    "database": true,
+    ".gitignore": true,
+    "**/project.lock.json": true
   }
 }
