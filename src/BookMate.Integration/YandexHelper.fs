@@ -4,60 +4,13 @@ module YandexHelper =
     open BookMate.Core.Helpers.StringHelper
     open Newtonsoft.Json
     open RestHelper
+    open Yandex
+    
     let private translateApiKey =  BookMate.Core.Configuration.getYandexTranslateApiKey()
     let private translateApiEndPoint = BookMate.Core.Configuration.getYandexTranslateApiEndPoint()
     let private dictionaryApiKey = BookMate.Core.Configuration.getYandexDictionaryApiKey() 
     let private dictionaryApiEndPoint = BookMate.Core.Configuration.getYandexDictionaryApiEndPoint()
     
-    type YandexTranslateResponse = {
-        code: int
-        lang: string
-        ///Fuck you
-        text: string[]
-    }
-
-    type YandexDictionaryResponse = {
-        ///Result header (not used).
-        head : obj
-        ///Array of dictionary entries. A transcription of the search word may be provided in the ts attribute
-        def : Definition[] }
-    and Definition ={
-        text: string
-        pos: string
-        ///Part of speech (may be omitted).
-        ts: string 
-        ///Array of translations.
-        tr: Translation[] 
-    }
-    and Translation = {
-        ///Text of the entry, translation, or synonym (mandatory).
-        text: string 
-        ///Part of speech (may be omitted).
-        pos: string 
-        ///Array of translations.
-        syn: Synonym[] 
-        ///Array of meanings.
-        mean: Meaning[] 
-        ///Array of examples.
-        ex: Example[] 
-    }
-    and Synonym = {
-        ///Text synonym (mandatory).
-        text: string 
-    }
-    and Meaning = {
-        ///Text of the entry.
-        text: string
-    }
-    and Example = {
-        ///Text of the synonym (mandatory).
-        text: string
-        ///Array of translations.
-        tr : ExampleTranslation[]
-    }
-    and ExampleTranslation = {
-        text: string
-    }
     let deserializeJsonDictionaryResponse = JsonConvert.DeserializeObject<YandexDictionaryResponse>
     let deserializeJsonTranslateResponse = JsonConvert.DeserializeObject<YandexTranslateResponse>
 
