@@ -62,8 +62,7 @@ module TranslationDownloadHelper =
             >> Array.zip ys
 
         printfn ""
-        [|("","","")|]
-        // toQuery
-        // |> downloadTranslations
-        // |> Array.Parallel.collect (fun (x, y) -> oneToMany y x)
-        // |> Array.Parallel.map (fun ((pos, ru), eng) -> (eng, pos, ru))
+        toQuery
+        |> downloadTranslations
+        |> Array.Parallel.collect (fun (x, y) -> oneToMany y x)
+        |> Array.Parallel.map (fun ((pos, ru), eng) -> (eng, pos, ru))
