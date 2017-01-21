@@ -3,11 +3,10 @@
 module YandexHelper = 
     open BookMate.Core.Helpers.StringHelper
     open Newtonsoft.Json
-
-    let private translateApiKey =  BookMate.Core.Configuration.getYandexTranslateApiKey// 
-    let private translateApiEndPoint = BookMate.Core.Configuration.getYandexTranslateApiEndPoint// 
-    let private dictionaryApiKey = BookMate.Core.Configuration.getYandexDictionaryApiKey // 
-    let private dictionaryApiEndPoint = BookMate.Core.Configuration.getYandexDictionaryApiEndPoint
+    let private translateApiKey =  BookMate.Core.Configuration.getYandexTranslateApiKey()
+    let private translateApiEndPoint = BookMate.Core.Configuration.getYandexTranslateApiEndPoint()
+    let private dictionaryApiKey = BookMate.Core.Configuration.getYandexDictionaryApiKey() 
+    let private dictionaryApiEndPoint = BookMate.Core.Configuration.getYandexDictionaryApiEndPoint()
     
     type YandexTranslateResponse = {
         code: int

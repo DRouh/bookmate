@@ -100,7 +100,7 @@ module EpubProcessor =
         translatedWords
 
     let loadUserDefinedWords = 
-        let fileName = BookMate.Core.Configuration.getUserDefinedWordsFilePath
+        let fileName = BookMate.Core.Configuration.getUserDefinedWordsFilePath()
         if File.Exists fileName then
             let words = File.ReadAllLines fileName
             words

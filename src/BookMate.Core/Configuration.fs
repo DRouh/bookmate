@@ -4,6 +4,7 @@ module Configuration =
     open System.IO
     open Newtonsoft.Json
     open System.Reflection
+    open Newtonsoft.Json.Linq
     
     type ApplicationConfiguration = {
         YandexTranslateApiEndPoint: string
@@ -20,19 +21,31 @@ module Configuration =
         Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), jsonFileName)
         |> File.ReadAllText
 
-    let private loadJsonConfigurationFromFile = readJsonConfigurationFromFile >> JsonConvert.DeserializeObject<ApplicationConfiguration>
+    let (|IsValidJson|NotValidJson|) (str:string) =
+        try
+            JContainer.Parse(str) |> ignore
+            IsValidJson
+        with
+        | _ -> NotValidJson
 
-    let applicationLoaderFromJsonFile (jsonFileName) = 
-        jsonFileName |> loadJsonConfigurationFromFile
+    let loadConfigurationFromJsonText jsonText = 
+        match jsonText with
+        | null -> invalidArg "jsonText" "Can't load application configuration from null string"
+        | IsValidJson -> JsonConvert.DeserializeObject<ApplicationConfiguration>(jsonText)
+        | NotValidJson -> 
+            let txt = sprintf "Provided string is not a valid json: %s" jsonText
+            invalidArg "jsonText" txt
 
-    let private applicationConfiguration =  lazy(applicationJsonActual |> applicationLoaderFromJsonFile)
+    let private applicationConfiguration =  lazy(
+        applicationJsonActual 
+        |> readJsonConfigurationFromFile
+        |> loadConfigurationFromJsonText)
 
     let public getApplicationConfiguration () = applicationConfiguration.Value
-
-    let getYandexTranslateApiEndPoint = getApplicationConfiguration().YandexTranslateApiEndPoint
-    let getYandexTranslateApiKey = getApplicationConfiguration().YandexTranslateApiKey
-    let getYandexDictionaryApiEndPoint = getApplicationConfiguration().YandexDictionaryApiEndPoint
-    let getYandexDictionaryApiKey = getApplicationConfiguration().YandexDictionaryApiKey
-    let getDBConnectionString = getApplicationConfiguration().DBConnectionString |> System.IO.Path.GetFullPath
-    let getUserDefinedWordsFilePath = getApplicationConfiguration().UserDefinedWordsFilePath
-    let getStanfordModelFolder = getApplicationConfiguration().StanfordModelFolder
+    let public getYandexTranslateApiEndPoint() = getApplicationConfiguration().YandexTranslateApiEndPoint
+    let public getYandexTranslateApiKey() = getApplicationConfiguration().YandexTranslateApiKey
+    let public getYandexDictionaryApiEndPoint() = getApplicationConfiguration().YandexDictionaryApiEndPoint
+    let public getYandexDictionaryApiKey() = getApplicationConfiguration().YandexDictionaryApiKey
+    let public getDBConnectionString() = getApplicationConfiguration().DBConnectionString |> System.IO.Path.GetFullPath
+    let public getUserDefinedWordsFilePath() = getApplicationConfiguration().UserDefinedWordsFilePath
+    let public getStanfordModelFolder() = getApplicationConfiguration().StanfordModelFolder
