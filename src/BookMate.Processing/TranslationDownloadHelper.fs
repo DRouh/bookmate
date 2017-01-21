@@ -16,9 +16,13 @@ module TranslationDownloadHelper =
         
         let splitByChuncks = Array.chunkBySize chunkSize >> Array.map (Array.reduce stringify)
         let downloadTranslations = 
-            Array.Parallel.map (fun w -> 
-                let ts = (YandexHelper.askYaTranslateAsyncf <| w <| updateDownloadProgress) |> Async.RunSynchronously
-                w, ts)
+            Array.Parallel.choose (fun w -> 
+                let ts = 
+                    (YandexHelper.askYaTranslateAsyncf <| w <| updateDownloadProgress) 
+                    |> Async.RunSynchronously
+                if ts.IsSome then Some (w, ts |> Option.get)
+                else None
+            ) 
         
         let flatten (arg : (string * string []) []) = 
             arg
@@ -30,10 +34,13 @@ module TranslationDownloadHelper =
             |> Array.concat
               
         printfn ""
-        toQuery
-        |> splitByChuncks
-        |> downloadTranslations
-        |> flatten
+            
+        let translations = 
+            toQuery 
+            |> splitByChuncks 
+            |> downloadTranslations 
+            |> flatten
+        translations
    
     let downloadDictionaryTranslations (toQuery : string []) = 
         //progress update

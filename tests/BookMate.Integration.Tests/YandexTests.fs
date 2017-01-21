@@ -10,14 +10,15 @@ module YandexTests =
     open BookMate.Integration.Yandex
     open BookMate.Integration.YandexHelper
     
-
     let dictionaryApiResponseJson = lazy(
         Path.Combine(System.IO.Directory.GetCurrentDirectory(), "exampleDictionaryResponse.json")
         |> File.ReadAllText
     )
 
+    let translateApiResponseJson = """ {"code":200,"lang":"en-ru","text":["предварительные"]} """
+
     [<Fact>]
-    let ``Serialized JSON Dictionary response should match expected example`` () =
+    let ``Serialized JSON DictionaryAPI response should match expected example`` () =
       let readJson = dictionaryApiResponseJson.Value
       
       let expected = expectedDictionaryResponse
@@ -26,7 +27,7 @@ module YandexTests =
       expected.def = actual.def |> should be True
 
     [<Fact>]
-    let ``Read configuration from JSON text should be equal to expected`` () = 
+    let ``'Part of speech - translation' pairs should be successfully extracted from Yandex DictionaryAPI response`` () = 
         let jsonFetcherMock = fun (_:string) -> async { return dictionaryApiResponseJson.Value }
         let jsonReaderMock = fun (_:string) -> expectedDictionaryResponse
         let apiEndpoint = "127.0.0.1"
@@ -41,4 +42,54 @@ module YandexTests =
           askYandexDictionary (jsonFetcherMock) (jsonReaderMock) apiEndpoint apiKey words
           |> Async.RunSynchronously
         
-        actual = expected |> should be True       
+        actual = expected |> should be True
+      
+    [<Fact>]
+    let ``Serialized JSON TranslateAPI response should match expected example`` () =
+      let readJson = translateApiResponseJson
+
+      let expected = {
+        code = 200
+        lang = "en-ru"
+        text = [| "предварительные" |]
+      }
+      let actual = deserializeJsonTranslateResponse readJson
+      
+      expected = actual |> should be True
+    
+    [<Theory>]
+    [<InlineData("предварительные");InlineData("");InlineData("   ")>]
+    let ``Translations should be successfully extracted from Yandex TranslateAPI response`` (translation : string) = 
+        let model = {
+          code = 200
+          lang = "en-ru"
+          text = [| translation |]
+        }
+        let apiEndpoint = "127.0.0.1"
+        let apiKey = "123456789"
+        let word = "test"
+        let jsonFetcherMock = fun (_:string) -> async { return translateApiResponseJson }
+        let jsonReaderMock = fun (_:string) -> model
+        let expected = [| translation.Trim() |]
+
+        let actual = askYandexTranslate jsonFetcherMock jsonReaderMock apiEndpoint apiKey word |> Async.RunSynchronously |> Option.get
+        
+        actual = expected |> should be True
+
+    [<Fact>]
+    let ``Exceeding day limits should cause return of None`` () =
+      let model = {
+          code = 401
+          lang = "en-ru"
+          text = [|""|]
+        }
+      let apiEndpoint = "127.0.0.1"
+      let apiKey = "123456789"
+      let word = "test"
+      let jsonFetcherMock = fun (_:string) -> async { return translateApiResponseJson }
+      let jsonReaderMock = fun (_:string) -> model
+      let expected = None
+      let actual = askYandexTranslate jsonFetcherMock jsonReaderMock apiEndpoint apiKey word |> Async.RunSynchronously 
+
+      actual = expected |> should be True
+      

@@ -21,9 +21,12 @@ module YandexHelper =
             let url = ComposeUrl apiEndpoint [ ("key", apiKey); ("text", word); ("lang", "en-ru"); ("format", "plain")] 
             let! response = getJsonFetcher url
 
-            let translateResponse = jsonReader(response) 
-            let translations = translateResponse.text |> Array.collect ((unstringify) >> (Array.map (fun x -> x.Trim())))
-            return translations
+            let translateResponse = jsonReader(response)
+            match translateResponse.code with
+            | 200 -> 
+                let translations = translateResponse.text |> Array.collect ((unstringify) >> (Array.map (fun x -> x.Trim())))
+                return Some translations
+            | _ -> return None
         }
         
     let askYandexDictionary (getJsonFetcher: string -> Async<string>) 
@@ -39,7 +42,7 @@ module YandexHelper =
         }
 
 //TranslateAPI   
-    let askYaTranslateAsync (word:string) : Async<string[]> = 
+    let askYaTranslateAsync (word:string) : Async<string[] option> = 
      async { 
             let apiKey = translateApiKey
             let apiEndpoint = translateApiEndPoint
@@ -48,7 +51,7 @@ module YandexHelper =
             return response
     }
 
-    let askYaTranslateAsyncf (word:string) f : Async<string[]>= 
+    let askYaTranslateAsyncf (word:string) f : Async<string[] option>= 
         async { 
             let! split = askYaTranslateAsync word
             f()
