@@ -1,6 +1,6 @@
-﻿namespace BookMate
+﻿namespace BookMate.Core.Tests
 
-module CommonTest = 
+module ConfigurationTests = 
     open Xunit
     open FsUnit.Xunit
     open BookMate.Core.Configuration
@@ -48,5 +48,5 @@ module CommonTest =
 
     [<Theory()>]
     [<InlineData(null);InlineData("");InlineData("     ")>]
-    let ``Empty string should not qualify as valid application configuration `` (jsonText:string) =
+    let ``Non-valid json strings should not qualify as valid application configuration `` (jsonText:string) =
         (fun () -> loadConfigurationFromJsonText jsonText |> ignore) |> should throw typeof<System.ArgumentException>
