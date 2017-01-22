@@ -14,8 +14,8 @@ module YandexHelper =
     let deserializeJsonDictionaryResponse = JsonConvert.DeserializeObject<YandexDictionaryResponse>
     let deserializeJsonTranslateResponse = JsonConvert.DeserializeObject<YandexTranslateResponse>
 
-    let askYandexTranslate (getJsonFetcher: string -> Async<string>) 
-                           (jsonReader: string -> YandexTranslateResponse) 
+    let askYandexTranslate (getJsonFetcher: GetResponseFetcher) 
+                           (jsonReader: YandexTranslateResponseBuilder) 
                            apiEndpoint apiKey word = 
         async {
             let url = ComposeUrl apiEndpoint [ ("key", apiKey); ("text", word); ("lang", "en-ru"); ("format", "plain")] 
@@ -28,9 +28,9 @@ module YandexHelper =
                 return Some translations
             | _ -> return None
         }
-        
-    let askYandexDictionary (getJsonFetcher: string -> Async<string>) 
-                            (jsonReader: string -> YandexDictionaryResponse) 
+    
+    let askYandexDictionary (getJsonFetcher: GetResponseFetcher) 
+                            (jsonReader: YandexDictionaryResponseBuilder) 
                             (apiEndpoint) (apiKey) (words) : Async<(string*string)[]> = 
         async {
             let url = ComposeUrl apiEndpoint [ ("key", apiKey); ("text", words); ("lang", "en-ru"); ("format", "plain")] 

@@ -1,6 +1,6 @@
 namespace BookMate.Integration
 
-module Yandex = 
+module Yandex =   
    type YandexTranslateResponse = {
         code: int
         lang: string
@@ -49,3 +49,7 @@ module Yandex =
     and ExampleTranslation = {
         text: string
     }
+
+   type GetResponseFetcher = string -> Async<string>
+   type YandexTranslateResponseBuilder = string -> YandexTranslateResponse
+   type YandexDictionaryResponseBuilder = string -> YandexDictionaryResponse
