@@ -1,6 +1,6 @@
 ﻿namespace BookMate.Processing
 
-module POSHelper = 
+module POS = 
     //use for referencehttp://www.ling.upenn.edu/courses/Fall_2003/ling001/penn_treebank_pos.html
     //Reflects Stanford definition of Part of Speech
     type StanfordPoS = 

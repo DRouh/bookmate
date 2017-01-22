@@ -2,11 +2,10 @@
 
 module EpubProcessor = 
     open BookMate.Core.Helpers.IOHelper
-    open BookMate.Helpers
     open HtmlAgilityPack
     open System.IO
-    open BookMate.Helpers.AnalyseHelper
-    open POSHelper
+    open BookMate.Processing.AnalyseHelper
+    open POS
     open BookMate.Core.Helpers
 
     let private prepareStatForExport = Array.Parallel.map (fun (w, p, c) -> sprintf "%s %A %i %s" w p c System.Environment.NewLine) >> String.concat (@"")
@@ -30,7 +29,7 @@ module EpubProcessor =
     let tryFind (lookup:(string*('a*'b)[])[]) word =
         lookup |> Array.where (fun (e, _) -> e = word) |> Seq.tryHead
 
-    let processText posTagger dict (text:string) = 
+    let processText dict (text:string) = 
         let findInDic = tryFind dict
         match text.Trim() with 
         | null | "" | "\r" | "\r\n" | "\n" -> text
@@ -45,25 +44,22 @@ module EpubProcessor =
                        | _ -> None)
                 |> Map.ofArray
 
-            let taggedWords = tagWords posTagger paragraph//todo refactor this to return common pos 
+            let taggedWords = tagWords paragraph//todo refactor this to return common pos 
             let mutable processedText = text
             for (word, pos) in taggedWords do
-                match stanfordToCommonPos pos with
-                | None -> ()
-                | Some commonPos ->
-                    let wordTranslations =  translations.TryFind word
-                    match wordTranslations with
-                    | Some v ->
-                        if Seq.isEmpty v then 
-                            ()
-                        else
-                            let translationsForExactPos = v |> Array.where (fun (p, _) -> commonPos |> List.contains p)
-                            let choice = if Seq.isEmpty translationsForExactPos then v else translationsForExactPos
-                            let translationsToUse = choice |> Array.map (snd) |> Seq.truncate 3 |> Array.ofSeq |> Array.reduce (StringHelper.stringify)
-                            let pattern = @"\b" + word + @"\b"
-                            let replace = word + "{" + translationsToUse + "}"
-                            processedText <- RegexHelper.regexReplace text pattern replace
-                    | _ -> ()
+                let wordTranslations =  translations.TryFind word
+                match wordTranslations with
+                | Some wt ->
+                    if Seq.isEmpty wt then 
+                        ()
+                    else
+                        let translationsForExactPos = wt |> Array.where (fun (p, _) -> pos = p)
+                        let choice = if Seq.isEmpty translationsForExactPos then wt else translationsForExactPos
+                        let translationsToUse = choice |> Array.map (snd) |> Seq.truncate 3 |> Array.ofSeq |> Array.reduce (StringHelper.stringify)
+                        let pattern = @"\b" + word + @"\b"
+                        let replace = word + "{" + translationsToUse + "}"
+                        processedText <- RegexHelper.regexReplace text pattern replace
+                | _ -> ()
             processedText 
 
     let convertPosForArray = 
@@ -116,14 +112,11 @@ module EpubProcessor =
         //load book
         let text = loadBook bookPath
         
-        //load pos tagger
-        let posTagger = getPosTagger
-        
         //load dictionary from database
         let dbDictionary = [|("", Adjective, "")|]  //BookMate.Integration.DBHelper.loadFromDB |> convertPosForArray
 
         //get book statistics
-        let wordStat = AnalyseHelper.getWordStats posTagger text
+        let wordStat = AnalyseHelper.getWordStats text
 
         //save book statistics
         let statToExport' = wordStat |> prepareStatForExport
@@ -177,7 +170,7 @@ module EpubProcessor =
         for f in contentFiles do
             do printfn "-%s" <| getFileName f
         
-        let translateProcessText = processText <| posTagger <| dictionaryForBook
+        let translateProcessText = processText <| dictionaryForBook
         let updateProgress fileCount nodeCount fileInd nodeInd =
             let processedNodeProgress = (float32 nodeInd) / (float32 nodeCount)
             let prevFilesProgress = (float32 fileInd) / (float32 fileCount - 1.0f)
@@ -226,8 +219,3 @@ module EpubProcessor =
         printfn "Cleaning up tmp folder."
         do deleteFiles tmpPath "*.*" true true
         printfn "The book has been processed."
-
-
-//Bootstrap project where all DI will be wired
-//Extract book analysis from main routine and create it as separate service
-//Separate database access functionality from implementation and current database

@@ -5,7 +5,8 @@
     "compilerName": "fsc",
     "compile": {
       "includeFiles": [
-        "POSHelper.fs",
+        "POS.fs",
+        "Analyse.fs",
         "TranslationDownloadHelper.fs",
         "AnalyseHelper.fs",
         "EpubProcessor.fs"
