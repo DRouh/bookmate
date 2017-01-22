@@ -13,7 +13,6 @@
     "xunit": "2.2.0-beta5-*",
     "FsUnit.Xunit": "2.3.0-*",
     "dotnet-test-xunit": "2.2.0-preview2-*",
-    "RichardSzalay.MockHttp": "*",
     "BookMate.Integration": {
       "version": "1.0.0",
       "type": "build"
