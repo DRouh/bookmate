@@ -6,8 +6,11 @@ module AnalyseHelper =
     open POS
     open Analyse
 
-    let getPosTagger () : Tagger = fun _ -> raise (System.NotImplementedException "Not ready")
-    let getTokenizer () :  Tokenizer = fun _ -> raise (System.NotImplementedException "Not ready")
+    let stubTagger : Tagger = fun (_:string) -> Seq.empty<string*CommonPoS>
+    let stubTokenizer : Tokenizer = fun (_:bool) (_:string) -> Seq.empty<string>
+    
+    let getPosTagger () : Tagger = stubTagger
+    let getTokenizer () :  Tokenizer = stubTokenizer
 
     let tagWords' (textToTags: Tagger) = textToTags >> Array.ofSeq 
 
@@ -15,7 +18,7 @@ module AnalyseHelper =
 
     let computeWordPosStat = 
         Array.where (fun (word:string, pos:CommonPoS) -> isNotNull word)
-        Array.Parallel.map (fun (word:string, pos) -> (word.ToLower(), pos))
+        >> Array.Parallel.map (fun (word:string, pos) -> (word.ToLower(), pos))
         >> Array.groupBy (fun (word, _) -> word)
         >> Array.Parallel.map (fun (word, group) -> 
                                         let poss = group |> Array.map (fun (w,p) -> p)
