@@ -57,6 +57,7 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Domain.fs" />
+    <Compile Include="StanfordNlp.fs" />
     <Compile Include="Processing.fs" />
     <Compile Include="Rest.fs" />
     <Compile Include="SuaveUtils.fs" />
@@ -66,13 +67,157 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="ejml-0.23">
+      <HintPath>D:\coding\fsharp\BookMate.NLPServices\packages\Stanford.NLP.CoreNLP.3.7.0.0\lib\ejml-0.23.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="FSharp.Core">
       <HintPath>..\packages\FSharp.Core.4.0.0.1\lib\net40\FSharp.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="IKVM.AWT.WinForms">
+      <HintPath>D:\coding\fsharp\BookMate.NLPServices\packages\IKVM.8.1.5717.0\lib\IKVM.AWT.WinForms.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Beans">
+      <HintPath>D:\coding\fsharp\BookMate.NLPServices\packages\IKVM.8.1.5717.0\lib\IKVM.OpenJDK.Beans.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Charsets">
+      <HintPath>D:\coding\fsharp\BookMate.NLPServices\packages\IKVM.8.1.5717.0\lib\IKVM.OpenJDK.Charsets.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Cldrdata">
+      <HintPath>D:\coding\fsharp\BookMate.NLPServices\packages\IKVM.8.1.5717.0\lib\IKVM.OpenJDK.Cldrdata.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Corba">
+      <HintPath>D:\coding\fsharp\BookMate.NLPServices\packages\IKVM.8.1.5717.0\lib\IKVM.OpenJDK.Corba.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Core">
+      <HintPath>D:\coding\fsharp\BookMate.NLPServices\packages\IKVM.8.1.5717.0\lib\IKVM.OpenJDK.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Jdbc">
+      <HintPath>D:\coding\fsharp\BookMate.NLPServices\packages\IKVM.8.1.5717.0\lib\IKVM.OpenJDK.Jdbc.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Localedata">
+      <HintPath>D:\coding\fsharp\BookMate.NLPServices\packages\IKVM.8.1.5717.0\lib\IKVM.OpenJDK.Localedata.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Management">
+      <HintPath>D:\coding\fsharp\BookMate.NLPServices\packages\IKVM.8.1.5717.0\lib\IKVM.OpenJDK.Management.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Media">
+      <HintPath>D:\coding\fsharp\BookMate.NLPServices\packages\IKVM.8.1.5717.0\lib\IKVM.OpenJDK.Media.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Misc">
+      <HintPath>D:\coding\fsharp\BookMate.NLPServices\packages\IKVM.8.1.5717.0\lib\IKVM.OpenJDK.Misc.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Naming">
+      <HintPath>D:\coding\fsharp\BookMate.NLPServices\packages\IKVM.8.1.5717.0\lib\IKVM.OpenJDK.Naming.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Nashorn">
+      <HintPath>D:\coding\fsharp\BookMate.NLPServices\packages\IKVM.8.1.5717.0\lib\IKVM.OpenJDK.Nashorn.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Remoting">
+      <HintPath>D:\coding\fsharp\BookMate.NLPServices\packages\IKVM.8.1.5717.0\lib\IKVM.OpenJDK.Remoting.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Security">
+      <HintPath>D:\coding\fsharp\BookMate.NLPServices\packages\IKVM.8.1.5717.0\lib\IKVM.OpenJDK.Security.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.SwingAWT">
+      <HintPath>D:\coding\fsharp\BookMate.NLPServices\packages\IKVM.8.1.5717.0\lib\IKVM.OpenJDK.SwingAWT.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Text">
+      <HintPath>D:\coding\fsharp\BookMate.NLPServices\packages\IKVM.8.1.5717.0\lib\IKVM.OpenJDK.Text.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Tools">
+      <HintPath>D:\coding\fsharp\BookMate.NLPServices\packages\IKVM.8.1.5717.0\lib\IKVM.OpenJDK.Tools.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Util">
+      <HintPath>D:\coding\fsharp\BookMate.NLPServices\packages\IKVM.8.1.5717.0\lib\IKVM.OpenJDK.Util.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.XML.API">
+      <HintPath>D:\coding\fsharp\BookMate.NLPServices\packages\IKVM.8.1.5717.0\lib\IKVM.OpenJDK.XML.API.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.XML.Bind">
+      <HintPath>D:\coding\fsharp\BookMate.NLPServices\packages\IKVM.8.1.5717.0\lib\IKVM.OpenJDK.XML.Bind.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.XML.Crypto">
+      <HintPath>D:\coding\fsharp\BookMate.NLPServices\packages\IKVM.8.1.5717.0\lib\IKVM.OpenJDK.XML.Crypto.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.XML.Parse">
+      <HintPath>D:\coding\fsharp\BookMate.NLPServices\packages\IKVM.8.1.5717.0\lib\IKVM.OpenJDK.XML.Parse.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.XML.Transform">
+      <HintPath>D:\coding\fsharp\BookMate.NLPServices\packages\IKVM.8.1.5717.0\lib\IKVM.OpenJDK.XML.Transform.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.XML.WebServices">
+      <HintPath>D:\coding\fsharp\BookMate.NLPServices\packages\IKVM.8.1.5717.0\lib\IKVM.OpenJDK.XML.WebServices.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.XML.XPath">
+      <HintPath>D:\coding\fsharp\BookMate.NLPServices\packages\IKVM.8.1.5717.0\lib\IKVM.OpenJDK.XML.XPath.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="IKVM.Runtime">
+      <HintPath>D:\coding\fsharp\BookMate.NLPServices\packages\IKVM.8.1.5717.0\lib\IKVM.Runtime.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="IKVM.Runtime.JNI">
+      <HintPath>D:\coding\fsharp\BookMate.NLPServices\packages\IKVM.8.1.5717.0\lib\IKVM.Runtime.JNI.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="javax.json">
+      <HintPath>D:\coding\fsharp\BookMate.NLPServices\packages\Stanford.NLP.CoreNLP.3.7.0.0\lib\javax.json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="joda-time">
+      <HintPath>D:\coding\fsharp\BookMate.NLPServices\packages\Stanford.NLP.CoreNLP.3.7.0.0\lib\joda-time.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="jollyday">
+      <HintPath>D:\coding\fsharp\BookMate.NLPServices\packages\Stanford.NLP.CoreNLP.3.7.0.0\lib\jollyday.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="protobuf">
+      <HintPath>D:\coding\fsharp\BookMate.NLPServices\packages\Stanford.NLP.CoreNLP.3.7.0.0\lib\protobuf.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="slf4j-api">
+      <HintPath>D:\coding\fsharp\BookMate.NLPServices\packages\Stanford.NLP.CoreNLP.3.7.0.0\lib\slf4j-api.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="slf4j-simple">
+      <HintPath>D:\coding\fsharp\BookMate.NLPServices\packages\Stanford.NLP.CoreNLP.3.7.0.0\lib\slf4j-simple.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="stanford-corenlp-3.7.0">
+      <HintPath>D:\coding\fsharp\BookMate.NLPServices\packages\Stanford.NLP.CoreNLP.3.7.0.0\lib\stanford-corenlp-3.7.0.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Suave">
@@ -92,6 +237,10 @@
     </Reference>
     <Reference Include="System.Reactive.Linq">
       <HintPath>..\packages\Rx-Linq.2.1.30214.0\lib\Net45\System.Reactive.Linq.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="xom">
+      <HintPath>D:\coding\fsharp\BookMate.NLPServices\packages\Stanford.NLP.CoreNLP.3.7.0.0\lib\xom.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>

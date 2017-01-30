@@ -21,10 +21,14 @@ module Program =
     
     [<EntryPoint>]
     let main argv = 
+        let pathToStanfordModel = @""
+        let tagger = StanfordNlp.loadStanfordTagger (pathToStanfordModel)
+        let tagText = StanfordNlp.tagText tagger
+        
         let tagActor = 
             new Agent<ProcessTagEntry>(fun inbox -> 
             let rec loop() = async { let! cmd = inbox.Receive()
-                                     let! entry = handleTagEnry cmd
+                                     let! entry = handleTagEnry cmd tagText
                                      let! _ = addToStore entry
                                      return! loop() }
             loop())
@@ -36,7 +40,7 @@ module Program =
               GetByGuid = getProcessedTextFromStore
               Exists = getProcessedTextFromStore >> Option.isSome }
         
-        let taggerApiEndpoint = "api/tagger/process"
+        let taggerApiEndpoint = "api/tagger/stanford"
         let taggerProcessQueueWebPart = rest taggerApiEndpoint taggerApi
         startWebServer defaultConfig (choose [ taggerProcessQueueWebPart ])
         0
