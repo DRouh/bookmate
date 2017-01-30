@@ -13,7 +13,7 @@ module Configuration =
         YandexDictionaryApiKey: string
         DBConnectionString: string
         UserDefinedWordsFilePath: string
-        StanfordModelFolder: string
+        StanfordTaggerFilePath: string
     }
 
     let applicationJsonActual = @"appconfiguration.json"
@@ -48,4 +48,4 @@ module Configuration =
     let public getYandexDictionaryApiKey() = getApplicationConfiguration().YandexDictionaryApiKey
     let public getDBConnectionString() = getApplicationConfiguration().DBConnectionString |> System.IO.Path.GetFullPath
     let public getUserDefinedWordsFilePath() = getApplicationConfiguration().UserDefinedWordsFilePath
-    let public getStanfordModelFolder() = getApplicationConfiguration().StanfordModelFolder
+    let public getStanfordTaggerFilePath () = getApplicationConfiguration().StanfordTaggerFilePath

@@ -14,9 +14,11 @@ module Processing =
               Text = entry.Text }
         newEntry
     
-    let handleTagEnry (tagEntry : ProcessTagEntry) (tagText : TextTagger) = 
+    let handleTagEnry (tagEntry : ProcessTagEntry) (tagText:TextTagger) = 
         async { 
+            printfn "Received:%A." tagEntry.Uuid
             let taggedWords = tagText tagEntry.Text
+            printfn "Processed:%A." tagEntry.Uuid
             return { Uuid = tagEntry.Uuid
                      Tagged = taggedWords }
         }
@@ -24,7 +26,7 @@ module Processing =
     let addToStore taggedEntry = 
         async { 
             let success = processedEntries.TryAdd(taggedEntry.Uuid, taggedEntry)
-            if success then ()
+            if success then printfn "Successfully added %A" taggedEntry.Uuid
             else printfn "Failed to add %A" taggedEntry.Uuid
             return success
         }

@@ -10,6 +10,6 @@ module Domain =
     
     type TaggedEntry = 
         { Uuid : Guid
-          Tagged : (string * string) [] }
-    
-    type TextTagger = string -> (string * string) []
+          Tagged : (string*string)[] }
+
+    type TextTagger = string -> (string*string)[]

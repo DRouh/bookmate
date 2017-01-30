@@ -21,7 +21,7 @@ module Program =
     
     [<EntryPoint>]
     let main argv = 
-        let pathToStanfordModel = @""
+        let pathToStanfordModel = @"..\..\data\nlpcore\models\pos-tagger\english-left3words\english-left3words-distsim.tagger"
         let tagger = StanfordNlp.loadStanfordTagger (pathToStanfordModel)
         let tagText = StanfordNlp.tagText tagger
         

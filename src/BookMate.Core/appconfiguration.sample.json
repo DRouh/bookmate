@@ -5,5 +5,5 @@
   "YandexDictionaryApiKey": "",
   "DBConnectionString": "",
   "UserDefinedWordsFilePath": "",
-  "StanfordModelFolder": ""
+  "StanfordTaggerFilePath": ""
 }
