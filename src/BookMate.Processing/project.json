@@ -6,6 +6,7 @@
     "compile": {
       "includeFiles": [
         "POS.fs",
+        "StanfordNlp.fs",
         "Analyse.fs",
         "TranslationDownloadHelper.fs",
         "AnalyseHelper.fs",
