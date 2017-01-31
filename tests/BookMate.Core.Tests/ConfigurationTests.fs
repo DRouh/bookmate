@@ -13,7 +13,8 @@ module ConfigurationTests =
             YandexDictionaryApiKey="YandexDictionaryApiKey"
             DBConnectionString="DBConnectionString"
             UserDefinedWordsFilePath="UserDefinedWordsFilePath"
-            StanfordModelFolder="StanfordModelFolder"
+            StanfordTaggerFilePath = "StanfordTaggerFilePath"
+            StanfordTaggerEndpoint = "StanfordTaggerEndpoint"
         }
 
     [<Fact>]
@@ -26,7 +27,8 @@ module ConfigurationTests =
                 "YandexDictionaryApiKey": "YandexDictionaryApiKey",
                 "DBConnectionString": "DBConnectionString",
                 "UserDefinedWordsFilePath": "UserDefinedWordsFilePath",
-                "StanfordModelFolder": "StanfordModelFolder"
+                "StanfordTaggerFilePath": "StanfordTaggerFilePath",
+                "StanfordTaggerEndpoint": "StanfordTaggerEndpoint"
             }
         """
         let actualConfiguration = loadConfigurationFromJsonText jsonToTest
