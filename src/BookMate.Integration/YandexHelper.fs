@@ -3,7 +3,7 @@
 module YandexHelper = 
     open BookMate.Core.Helpers.StringHelper
     open Newtonsoft.Json
-    open RestHelper
+    open BookMate.Integration.RestUtils
     open Yandex
     
     let private translateApiKey =  BookMate.Core.Configuration.getYandexTranslateApiKey()

@@ -6,7 +6,7 @@
     "compile": {
       "includeFiles": [
         "Yandex.fs",
-        "RestHelper.fs",
+        "RestUtils.fs",
         "YandexHelper.fs"
       ]
     }
