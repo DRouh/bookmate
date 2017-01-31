@@ -25,15 +25,15 @@ module Program =
         let tagger = StanfordNlp.loadStanfordTagger (pathToStanfordModel)
         let tagText = StanfordNlp.tagText tagger
         
-        let tagActor = 
+        let tagAgent = 
             new Agent<ProcessTagEntry>(fun inbox -> 
             let rec loop() = async { let! cmd = inbox.Receive()
                                      let! entry = handleTagEnry cmd tagText
                                      let! _ = addToStore entry
                                      return! loop() }
             loop())
-        do tagActor.Start()
-        let addTextToProcessing' = Observer.Create(Action<ProcessTagEntry> tagActor.Post) |> addTextToProcessing
+        do tagAgent.Start()
+        let addTextToProcessing' = Observer.Create(Action<ProcessTagEntry> tagAgent.Post) |> addTextToProcessing
         
         let taggerApi = 
             { Create = (ProcessTagEntryWithDefaults >> addTextToProcessing')
