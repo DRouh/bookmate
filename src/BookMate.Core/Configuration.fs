@@ -14,6 +14,7 @@ module Configuration =
         DBConnectionString: string
         UserDefinedWordsFilePath: string
         StanfordTaggerFilePath: string
+        StanfordTaggerEndpoint: string
     }
 
     let applicationJsonActual = @"appconfiguration.json"
@@ -49,3 +50,5 @@ module Configuration =
     let public getDBConnectionString() = getApplicationConfiguration().DBConnectionString |> System.IO.Path.GetFullPath
     let public getUserDefinedWordsFilePath() = getApplicationConfiguration().UserDefinedWordsFilePath
     let public getStanfordTaggerFilePath () = getApplicationConfiguration().StanfordTaggerFilePath
+
+    let public getStanfordTaggerEndpoint () = getApplicationConfiguration().StanfordTaggerEndpoint
