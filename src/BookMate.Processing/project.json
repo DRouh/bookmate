@@ -7,6 +7,7 @@
       "includeFiles": [
         "POS.fs",
         "StanfordNlp.fs",
+        "StanfordTagger.fs",
         "Analyse.fs",
         "TranslationDownloadHelper.fs",
         "AnalyseHelper.fs",

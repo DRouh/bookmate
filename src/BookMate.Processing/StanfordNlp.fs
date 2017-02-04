@@ -1,8 +1,11 @@
 namespace BookMate.Processing
 
 module StanfordNlp = 
+      open System
       open BookMate.Processing.POS
-      
+      open BookMate.Core.JsonUtils
+      open BookMate.Core.Monads.Maybe
+
       type StanfordPoS = 
         | CC //Coordinating conjunction
         | CD //Cardinal number
@@ -101,7 +104,9 @@ module StanfordNlp =
         | VBG | VBN -> Some [ Verb; Participle ]
         | WP | WP_S -> Some [ Pronoun ]
 
+      
       let stanfordPosToString value = 
+
           function
           | WP_S -> "WP$"
           | PRP_S -> "PRP$"
