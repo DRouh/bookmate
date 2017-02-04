@@ -2,44 +2,58 @@
 
 module YandexHelper = 
     open BookMate.Core.Helpers.StringHelper
-    open FSharp.Data
+    open Newtonsoft.Json
+    open BookMate.Integration.RestUtils
+    open Yandex
     
-    let private translateApiKey = BookMate.Core.Configuration.getYandexTranslateApiKey
-    let private translateApiEndPoint =  BookMate.Core.Configuration.getYandexTranslateApiEndPoint
-    let private dictionaryApiKey = BookMate.Core.Configuration.getYandexDictionaryApiKey
-    let private dictionaryApiEndPoint = BookMate.Core.Configuration.getYandexDictionaryApiEndPoint
+    let private translateApiKey =  BookMate.Core.Configuration.getYandexTranslateApiKey()
+    let private translateApiEndPoint = BookMate.Core.Configuration.getYandexTranslateApiEndPoint()
+    let private dictionaryApiKey = BookMate.Core.Configuration.getYandexDictionaryApiKey() 
+    let private dictionaryApiEndPoint = BookMate.Core.Configuration.getYandexDictionaryApiEndPoint()
     
-    type private TranslateYandexResponse = JsonProvider< """ {"code": 200,"lang": "en-ru","text": [ "раз, два"]} """ >
-    type private DictionaryYandexResponse = JsonProvider< """ {"head":{},"def":[{"text":"one","pos":"verb","ts":"fʌk","tr":[{"text":"раз","pos":"verb","asp":"несов","syn":[{"text":"два","pos":"verb","asp":"сов"},{"text":"три","pos":"verb","asp":"сов"},{"text":"четыре","pos":"verb"}],"mean":[{"text":"shag"},{"text":"have"}]},{"text":"пять","pos":"verb","asp":"сов","syn":[{"text":"шесть","pos":"verb","asp":"сов"}]}]},{"text":"one","pos":"adverb","ts":"fʌk","tr":[{"text":"к черту","pos":"adverb"}]}]} """ >
-    
-    let private askYandexTranslate apiEndpoint apiKey words = 
-        Http.AsyncRequestString(apiEndpoint, httpMethod = "GET", 
-                                query = [ "key", apiKey
-                                          "text", words
-                                          "lang", "en-ru"
-                                          "format", "plain" ], headers = [ "Accept", "application/json" ])
+    let deserializeJsonDictionaryResponse = JsonConvert.DeserializeObject<YandexDictionaryResponse>
+    let deserializeJsonTranslateResponse = JsonConvert.DeserializeObject<YandexTranslateResponse>
 
-    let private askYandexDictionary apiEndpoint apiKey words = 
-        Http.AsyncRequestString(apiEndpoint, httpMethod = "GET", 
-                    query = [ "key", apiKey
-                              "text", words
-                              "lang", "en-ru" ], headers = [ "Accept", "application/json" ])
+    let askYandexTranslate (getJsonFetcher: GetResponseFetcher) 
+                           (jsonReader: YandexTranslateResponseBuilder) 
+                           apiEndpoint apiKey word = 
+        async {
+            let url = ComposeUrl apiEndpoint [ ("key", apiKey); ("text", word); ("lang", "en-ru"); ("format", "plain")] 
+            let! (response,code) = getJsonFetcher url
+
+            let translateResponse = jsonReader(response)
+            match translateResponse.code with
+            | 200 -> 
+                let translations = translateResponse.text |> Array.collect ((unstringify) >> (Array.map (fun x -> x.Trim())))
+                return Some translations
+            | _ -> return None
+        }
+    
+    let askYandexDictionary (getJsonFetcher: GetResponseFetcher) 
+                            (jsonReader: YandexDictionaryResponseBuilder) 
+                            (apiEndpoint) (apiKey) (words) : Async<(string*string)[]> = 
+        async {
+            let url = ComposeUrl apiEndpoint [ ("key", apiKey); ("text", words); ("lang", "en-ru"); ("format", "plain")] 
+            let! (response,code) = getJsonFetcher url
+
+            let dictionaryResponse = jsonReader(response)
+            let wordsWithTranslations = dictionaryResponse.def |> Array.collect ((fun x -> x.tr) >> (fun x -> x |> Array.map (fun y -> y.pos, y.text)))
+            return wordsWithTranslations
+        }
+
 //TranslateAPI   
-
-    let askYaTranslateAsync words = 
-        async { 
+    let askYaTranslateAsync (word:string) : Async<string[] option> = 
+     async { 
             let apiKey = translateApiKey
             let apiEndpoint = translateApiEndPoint
-            let askYa = askYandexTranslate apiEndpoint apiKey
-            let! response = askYa words
-            let text = response |> TranslateYandexResponse.Parse
-            let split = text.Text |> Array.collect ((unstringify) >> (Array.map (fun x -> x.Trim())))
-            return split
-        }
-         
-    let askYaTranslateAsyncf words f = 
+            let askYa = askYandexTranslate (GetJsonAsync) (deserializeJsonTranslateResponse) apiEndpoint apiKey
+            let! response = askYa word
+            return response
+    }
+
+    let askYaTranslateAsyncf (word:string) f : Async<string[] option>= 
         async { 
-            let! split = askYaTranslateAsync words
+            let! split = askYaTranslateAsync word
             f()
             return split
         }
@@ -49,12 +63,11 @@ module YandexHelper =
         async { 
             let apiKey = dictionaryApiKey
             let apiEndpoint = dictionaryApiEndPoint
-            let askYa = askYandexDictionary apiEndpoint apiKey
+            let askYa = askYandexDictionary (GetJsonAsync) (deserializeJsonDictionaryResponse) apiEndpoint apiKey
             let! response = askYa words
-            let text = response |> DictionaryYandexResponse.Parse
-            let translations = text.Def |> Array.collect ((fun x -> x.Tr) >> (fun x -> x |> Array.map (fun y -> y.Pos, y.Text)))
-            return translations
+            return response
         } 
+
     let askYaDictionaryAsyncf words f = 
         async { 
             let! translations = askYaDictionaryAsync words

@@ -9,9 +9,7 @@ module IOHelper =
     let getFileName path = Path.GetFileName(path)
 
     let writeToFile (fileName : string) (whatToWrite : string) = 
-        let wr = new System.IO.StreamWriter(fileName)
-        do wr.Write whatToWrite  
-        wr.Close()
+        File.WriteAllText(fileName, whatToWrite)
     
     ///Deletes files with give pattern.
     let rec deleteFiles srcPath pattern includeSubDirs deleteSubDirs =

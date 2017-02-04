@@ -1,0 +1,10 @@
+﻿{
+  "YandexTranslateApiEndPoint": "",
+  "YandexTranslateApiKey": "",
+  "YandexDictionaryApiEndPoint": "",
+  "YandexDictionaryApiKey": "",
+  "DBConnectionString": "",
+  "UserDefinedWordsFilePath": "",
+  "StanfordTaggerFilePath": "",
+  "StanfordTaggerEndpoint": "http://localhost:8080/api/tagger/stanford"
+}

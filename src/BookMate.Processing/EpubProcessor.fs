@@ -2,12 +2,10 @@
 
 module EpubProcessor = 
     open BookMate.Core.Helpers.IOHelper
-    open BookMate.Helpers
-    open EpubSharp
     open HtmlAgilityPack
     open System.IO
-    open BookMate.Helpers.AnalyseHelper
-    open POSHelper
+    open BookMate.Processing.AnalyseHelper
+    open POS
     open BookMate.Core.Helpers
 
     let private prepareStatForExport = Array.Parallel.map (fun (w, p, c) -> sprintf "%s %A %i %s" w p c System.Environment.NewLine) >> String.concat (@"")
@@ -15,21 +13,23 @@ module EpubProcessor =
 
     let private loadBook = 
         function
-        | "" | null -> failwith "Can't use empty file path to load the book"
-        | path -> 
-            match File.Exists(path) with
-            | true -> 
-                let fileName = getFileNameWithoutExtension path
-                let book = EpubReader.Read(path)
-                let text = book.ToPlainText()
-                printfn "Loaded %s" fileName
-                text
-            | _ -> failwith "File does not exist."
+        | _ -> ""
+        // function
+        // | "" | null -> failwith "Can't use empty file path to load the book"
+        // | path -> 
+        //     match File.Exists(path) with
+        //     | true -> 
+        //         let fileName = getFileNameWithoutExtension path
+        //         let book = EpubReader.Read(path)
+        //         let text = book.ToPlainText()
+        //         printfn "Loaded %s" fileName
+        //         text
+        //     | _ -> failwith "File does not exist."
     
     let tryFind (lookup:(string*('a*'b)[])[]) word =
         lookup |> Array.where (fun (e, _) -> e = word) |> Seq.tryHead
 
-    let processText posTagger dict (text:string) = 
+    let processText dict (text:string) = 
         let findInDic = tryFind dict
         match text.Trim() with 
         | null | "" | "\r" | "\r\n" | "\n" -> text
@@ -44,25 +44,22 @@ module EpubProcessor =
                        | _ -> None)
                 |> Map.ofArray
 
-            let taggedWords = tagWords posTagger paragraph//todo refactor this to return common pos 
+            let taggedWords = tagWords paragraph//todo refactor this to return common pos 
             let mutable processedText = text
             for (word, pos) in taggedWords do
-                match stanfordToCommonPos pos with
-                | None -> ()
-                | Some commonPos ->
-                    let wordTranslations =  translations.TryFind word
-                    match wordTranslations with
-                    | Some v ->
-                        if Seq.isEmpty v then 
-                            ()
-                        else
-                            let translationsForExactPos = v |> Array.where (fun (p, _) -> commonPos |> List.contains p)
-                            let choice = if Seq.isEmpty translationsForExactPos then v else translationsForExactPos
-                            let translationsToUse = choice |> Array.map (snd) |> Seq.truncate 3 |> Array.ofSeq |> Array.reduce (StringHelper.stringify)
-                            let pattern = @"\b" + word + @"\b"
-                            let replace = word + "{" + translationsToUse + "}"
-                            processedText <- RegexHelper.regexReplace text pattern replace
-                    | _ -> ()
+                let wordTranslations =  translations.TryFind word
+                match wordTranslations with
+                | Some wt ->
+                    if Seq.isEmpty wt then 
+                        ()
+                    else
+                        let translationsForExactPos = wt |> Array.where (fun (p, _) -> pos = p)
+                        let choice = if Seq.isEmpty translationsForExactPos then wt else translationsForExactPos
+                        let translationsToUse = choice |> Array.map (snd) |> Seq.truncate 3 |> Array.ofSeq |> Array.reduce (StringHelper.stringify)
+                        let pattern = @"\b" + word + @"\b"
+                        let replace = word + "{" + translationsToUse + "}"
+                        processedText <- RegexHelper.regexReplace text pattern replace
+                | _ -> ()
             processedText 
 
     let convertPosForArray = 
@@ -99,7 +96,7 @@ module EpubProcessor =
         translatedWords
 
     let loadUserDefinedWords = 
-        let fileName = BookMate.Core.Configuration.getUserDefinedWordsFilePath
+        let fileName = BookMate.Core.Configuration.getUserDefinedWordsFilePath()
         if File.Exists fileName then
             let words = File.ReadAllLines fileName
             words
@@ -115,14 +112,11 @@ module EpubProcessor =
         //load book
         let text = loadBook bookPath
         
-        //load pos tagger
-        let posTagger = getPosTagger
-        
         //load dictionary from database
-        let dbDictionary = BookMate.Integration.DBHelper.loadFromDB |> convertPosForArray
+        let dbDictionary = [|("", Adjective, "")|]  //BookMate.Integration.DBHelper.loadFromDB |> convertPosForArray
 
         //get book statistics
-        let wordStat = AnalyseHelper.getWordStats posTagger text
+        let wordStat = AnalyseHelper.getWordStats text
 
         //save book statistics
         let statToExport' = wordStat |> prepareStatForExport
@@ -144,6 +138,7 @@ module EpubProcessor =
         do IOHelper.writeToFile (path +/ (sprintf "%s-translations.txt" fileName)) preparedForSavingTranslations
         
         //form dictionary for the book
+
         let dictionaryForBook = formDictionaryForBook userDefinedWords wordStat queriedTranslations dbDictionary
         
         //IO operations - creatint tmp folder, unzipping file,...
@@ -175,7 +170,7 @@ module EpubProcessor =
         for f in contentFiles do
             do printfn "-%s" <| getFileName f
         
-        let translateProcessText = processText <| posTagger <| dictionaryForBook
+        let translateProcessText = processText <| dictionaryForBook
         let updateProgress fileCount nodeCount fileInd nodeInd =
             let processedNodeProgress = (float32 nodeInd) / (float32 nodeCount)
             let prevFilesProgress = (float32 fileInd) / (float32 fileCount - 1.0f)
@@ -191,7 +186,9 @@ module EpubProcessor =
             let html = new HtmlAgilityPack.HtmlDocument()
             html.OptionWriteEmptyNodes <- true
             html.OptionOutputAsXml <- true
-            do html.Load(processingFileName, System.Text.Encoding.UTF8)
+            
+            use reader = System.IO.File.OpenText(processingFileName)
+            do html.Load(reader)
             let textNodes = html.DocumentNode.SelectNodes("//p//text()")
             
             if not (isNull textNodes) then 

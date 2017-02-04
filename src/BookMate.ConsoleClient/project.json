@@ -1,0 +1,42 @@
+{
+  "version": "1.0.0-*",
+  "buildOptions": {
+    "debugType": "portable",
+    "emitEntryPoint": true,
+    "warningsAsErrors": true,
+    "compilerName": "fsc",
+    "compile": {
+      "includeFiles": [
+        "Program.fs"
+      ]
+    },
+    "copyToOutput": {
+      "mappings": {
+        "appconfiguration.json": "../BookMate.Core/appconfiguration.json"
+      }
+    }
+  },
+  "dependencies": {
+    "System.Net.Http": "4.3.0",
+    "BookMate.Core": "*",
+    "BookMate.Processing": "*",
+    "BookMate.Integration": "*"
+  },
+  "frameworks": {
+    "netcoreapp1.1": {
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "version": "1.1.0"
+        },
+        "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-161205"
+      }
+    }
+  },
+  "runtimes": {
+    "win7-x64": {}
+  },
+  "tools": {
+    "dotnet-compile-fsc": "1.0.0-preview2-*"
+  },
+  "version": "1.0.0-*"
+}

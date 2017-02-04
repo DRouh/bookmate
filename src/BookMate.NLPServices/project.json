@@ -1,0 +1,48 @@
+{
+  "version": "1.0.0-*",
+  "buildOptions": {
+    "debugType": "portable",
+    "emitEntryPoint": true,
+    "warningsAsErrors": true,
+    "compilerName": "fsc",
+    "compile": {
+      "includeFiles": [
+        "Domain.fs",
+        "Rest.fs",
+        "StanfordNlp.fs",
+        "SuaveUtils.fs",
+        "ApiConfiguration.fs",
+        "Processing.fs",
+        "Program.fs"
+      ]
+    },
+    "copyToOutput": {
+      "mappings": {
+        "appconfiguration.json": "../BookMate.Core/appconfiguration.json"
+      }
+    }
+  },
+  "dependencies": {
+    "Suave": "2.0.2",
+    "FSharp.Reactive": "2.2.131002",
+    "Newtonsoft.Json": "9.0.1",
+    "Rx-Core": "2.1.30214",
+    "Rx-Interfaces": "2.1.30214",
+    "Rx-Linq": "2.1.30214",
+    "Stanford.NLP.CoreNLP": "3.7.0"
+  },
+  "frameworks": {
+    "net461": {
+      "dependencies": {
+        "System.Runtime": "4.0.20",
+        "System.Threading.Tasks": "4.0.10"
+      }
+    }
+  },
+  "runtimes": {
+    "win7-x64": {}
+  },
+  "tools": {
+    "dotnet-compile-fsc": "1.0.0-preview2-*"
+  }
+}

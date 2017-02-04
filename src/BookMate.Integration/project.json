@@ -1,0 +1,33 @@
+{
+  "version": "1.0.0-*",
+  "buildOptions": {
+    "debugType": "portable",
+    "compilerName": "fsc",
+    "compile": {
+      "includeFiles": [
+        "Yandex.fs",
+        "RestUtils.fs",
+        "YandexHelper.fs"
+      ]
+    }
+  },
+  "tools": {
+    "dotnet-compile-fsc": "1.0.0-preview2-*"
+  },
+  "frameworks": {
+    "netstandard1.6": {
+      "dependencies": {
+        "BookMate.Core": "*",
+        "NETStandard.Library": "1.6.0",
+        "System.IO": "*",
+        "System.IO.Compression": "*"
+      },
+      "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-161205"
+    }
+  },
+  "dependencies": {
+    "Newtonsoft.Json": "9.0.1",
+    "System.Net.Http": "4.3.0",
+    "System.Text.RegularExpressions": "4.3.0"
+  }
+}
