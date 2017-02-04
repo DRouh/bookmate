@@ -19,7 +19,7 @@ module YandexHelper =
                            apiEndpoint apiKey word = 
         async {
             let url = ComposeUrl apiEndpoint [ ("key", apiKey); ("text", word); ("lang", "en-ru"); ("format", "plain")] 
-            let! response = getJsonFetcher url
+            let! (response,code) = getJsonFetcher url
 
             let translateResponse = jsonReader(response)
             match translateResponse.code with
@@ -34,7 +34,7 @@ module YandexHelper =
                             (apiEndpoint) (apiKey) (words) : Async<(string*string)[]> = 
         async {
             let url = ComposeUrl apiEndpoint [ ("key", apiKey); ("text", words); ("lang", "en-ru"); ("format", "plain")] 
-            let! response = getJsonFetcher url
+            let! (response,code) = getJsonFetcher url
 
             let dictionaryResponse = jsonReader(response)
             let wordsWithTranslations = dictionaryResponse.def |> Array.collect ((fun x -> x.tr) >> (fun x -> x |> Array.map (fun y -> y.pos, y.text)))

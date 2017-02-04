@@ -50,6 +50,6 @@ module Yandex =
         text: string
     }
 
-   type GetResponseFetcher = string -> Async<string>
+   type GetResponseFetcher = string -> Async<string*int>
    type YandexTranslateResponseBuilder = string -> YandexTranslateResponse
    type YandexDictionaryResponseBuilder = string -> YandexDictionaryResponse

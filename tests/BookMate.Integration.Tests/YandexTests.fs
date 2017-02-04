@@ -28,7 +28,7 @@ module YandexTests =
 
     [<Fact>]
     let ``'Part of speech - translation' pairs should be successfully extracted from Yandex DictionaryAPI response`` () = 
-        let jsonFetcherMock = fun (_:string) -> async { return dictionaryApiResponseJson.Value }
+        let jsonFetcherMock = fun (_:string) -> async { return (dictionaryApiResponseJson.Value, 200) }
         let jsonReaderMock = fun (_:string) -> expectedDictionaryResponse
         let apiEndpoint = "127.0.0.1"
         let apiKey = "123456789"
@@ -68,7 +68,7 @@ module YandexTests =
         let apiEndpoint = "127.0.0.1"
         let apiKey = "123456789"
         let word = "test"
-        let jsonFetcherMock = fun (_:string) -> async { return translateApiResponseJson }
+        let jsonFetcherMock = fun (_:string) -> async { return (translateApiResponseJson,200) }
         let jsonReaderMock = fun (_:string) -> model
         let expected = [| translation.Trim() |]
 
@@ -86,7 +86,7 @@ module YandexTests =
       let apiEndpoint = "127.0.0.1"
       let apiKey = "123456789"
       let word = "test"
-      let jsonFetcherMock = fun (_:string) -> async { return translateApiResponseJson }
+      let jsonFetcherMock = fun (_:string) -> async { return (translateApiResponseJson,200) }
       let jsonReaderMock = fun (_:string) -> model
       let expected = None
       let actual = askYandexTranslate jsonFetcherMock jsonReaderMock apiEndpoint apiKey word |> Async.RunSynchronously 
