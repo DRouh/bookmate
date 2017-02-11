@@ -4,5 +4,4 @@ call webpack
 
 cd server
 dotnet restore
-dotnet watch run
 cd..

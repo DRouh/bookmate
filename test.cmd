@@ -1,4 +1,7 @@
 @echo off
+cd tests
+
+@echo off
 cd BookMate.Core.Tests 
 call dotnet test 
 @echo off
