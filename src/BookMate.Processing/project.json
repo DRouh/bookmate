@@ -5,6 +5,7 @@
     "compilerName": "fsc",
     "compile": {
       "includeFiles": [
+        "DomainModel.fs",
         "POS.fs",
         "StanfordNlp.fs",
         "StanfordTagger.fs",
