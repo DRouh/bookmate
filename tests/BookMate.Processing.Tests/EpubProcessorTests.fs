@@ -2,6 +2,7 @@ namespace BookMate.Processing.Tests
 
 module EpubProcessorTests = 
     open System
+    open System.IO
     open Xunit
     open FsUnit.Xunit
     open BookMate.Processing
@@ -39,12 +40,14 @@ module EpubProcessorTests =
   5. Translate book sentence by sentence:
      5.1) Tag every word in sentence and look for best suiting translation available
 *)
-
+    let flip f a b = f b a
+    let unpackBook' = flip unpackBook
+    
     [<Fact>]
     let ``Unpacking invalid file path must result in invalid epub book path``() = 
         let data = InvalidFilePath
         let expected = InvalidPath
-        let actual = unpackBook data
+        let actual = unpackBook data ""
         expected = actual |> should be True
     
     [<Theory>]
@@ -56,5 +59,36 @@ module EpubProcessorTests =
         let actual = 
             data
             |> toFilePath
-            |> unpackBook
+            |> (unpackBook' "")
         expected = actual |> should be True
+    
+    [<Fact>]
+    let ``Unpacking non-epub file should result in InvalidPath``() = 
+        let currentDirectory = Directory.GetCurrentDirectory()
+        let fileName = sprintf "%s.txt" <| System.Guid.NewGuid().ToString()
+        let filePath = Path.Combine(currentDirectory, fileName)
+        let expected = InvalidPath
+        let stream = File.CreateText filePath
+        do stream.Dispose()
+        let actual = 
+            filePath
+            |> toFilePath
+            |> (unpackBook' "")
+        File.Delete filePath |> ignore
+        expected = actual |> should be True
+    
+    [<Fact>]
+    let ``Unpacking valid epub file should result in path to original file and to directory``() = 
+        let sampleDirectory = Path.Combine(Directory.GetCurrentDirectory(), "SampleData")
+        let sampleFile = Directory.GetFiles(sampleDirectory, "*.epub").[0]
+        let fileName = Path.GetFileNameWithoutExtension(sampleFile)
+
+        let saveDirName = sprintf "%s_%s" fileName (Guid.NewGuid().ToString())
+        let saveDirPath = Path.Combine(sampleDirectory, saveDirName)
+
+        let expected = ((sampleFile |> toFilePath), saveDirPath |> toDirPath) |> UnpackedPath
+        let actual = unpackBook (fileName |> toFilePath) (saveDirPath)
+        
+        expected = actual |> should be False //work in progress
+        Directory.Exists(saveDirPath) |> should be False //work in progress
+        //ToDo toDirPath must return false for directory that already exist
