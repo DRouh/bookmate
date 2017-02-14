@@ -1,32 +1,41 @@
 ﻿namespace BookMate.Processing
 
 module EpubProcessor = 
-    type FilePath = 
-        | ValidFilePath of string
-        | InvalidFilePath
+    open System.IO
+    open System.Text.RegularExpressions
+    open BookMate.Core.Helpers.RegexHelper
+
+    type FilePath = FilePath of string
     
     type DirPath = 
-        | ValidDirPath of string
+        | ToPackDirPath of string
+        | UnpackedDirPath of string
         | InvalidDirPath
     
-    type EpubBookPath = 
-        | UnpackedPath of FilePath * DirPath
-        | InvalidPath
+    type EpubBookPath = UnpackedPath of FilePath * DirPath
     
-    let toDirPath (dirPath : string) = 
+    let invalidPatter = "" //"[" + Regex.Escape(Path.GetInvalidPathChars()) + "]"
+
+    let isPlausibleDirPath = function
+        | Regex invalidPatter v -> false
+        | _ -> false
+
+    let toPackDirPath (dirPath : string) = 
         match dirPath with
         | "" | null -> InvalidDirPath
-        | dp -> 
-            if dp.Trim() <> "" then ValidDirPath dirPath
-            else InvalidDirPath
+        | dp when dp.Trim() <> ""-> 
+                if not (System.IO.Directory.Exists dirPath) then ToPackDirPath dirPath
+                else InvalidDirPath
+        | _ -> InvalidDirPath
     
     let toFilePath (filePath : string) = 
         if System.IO.File.Exists filePath then 
-            if filePath.ToLower().EndsWith(".epub") then ValidFilePath filePath
-            else InvalidFilePath
-        else InvalidFilePath
+            if filePath.ToLower().EndsWith(".epub") then (FilePath filePath) |> Some
+            else None
+        else None
     
-    let unpackBook (bookPath : FilePath) (savePath : string) : EpubBookPath = 
+    let unpackBook (bookPath : FilePath) (savePath : string) : EpubBookPath option = 
         match bookPath with
-        | ValidFilePath filePath -> UnpackedPath(InvalidFilePath, InvalidDirPath)
-        | _ -> InvalidPath
+        | FilePath filePath -> 
+            UnpackedPath(bookPath, UnpackedDirPath savePath) |> Some
+        | _ -> None

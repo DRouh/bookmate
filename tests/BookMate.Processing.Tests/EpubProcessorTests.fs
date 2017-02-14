@@ -42,53 +42,46 @@ module EpubProcessorTests =
 *)
     let flip f a b = f b a
     let unpackBook' = flip unpackBook
+    let sampleDirectory = Path.Combine(Directory.GetCurrentDirectory(), "SampleData")
     
-    [<Fact>]
-    let ``Unpacking invalid file path must result in invalid epub book path``() = 
-        let data = InvalidFilePath
-        let expected = InvalidPath
-        let actual = unpackBook data ""
-        expected = actual |> should be True
-    
+   
     [<Theory>]
     [<InlineData(null); InlineData(""); InlineData("c:\\q1q1w1"); InlineData("c:\\q1q1w1.gibberish")>]
-    let ``Unpacking should result in invalid path if file path does not exist`` (filePath) = 
-        let data = filePath
-        let expected = InvalidPath
-        
-        let actual = 
-            data
-            |> toFilePath
-            |> (unpackBook' "")
-        expected = actual |> should be True
+    let ``Path to nonexistent file is not valid FilePath`` (filePath) = 
+        let actual = filePath |> toFilePath
+        actual = None |> should be True
     
     [<Fact>]
-    let ``Unpacking non-epub file should result in InvalidPath``() = 
-        let currentDirectory = Directory.GetCurrentDirectory()
-        let fileName = sprintf "%s.txt" <| System.Guid.NewGuid().ToString()
-        let filePath = Path.Combine(currentDirectory, fileName)
-        let expected = InvalidPath
-        let stream = File.CreateText filePath
-        do stream.Dispose()
-        let actual = 
-            filePath
-            |> toFilePath
-            |> (unpackBook' "")
-        File.Delete filePath |> ignore
-        expected = actual |> should be True
+    let ``Path to existing non-epub file is not valid FilePath``() = 
+        let sampleTxtFilePath = Directory.GetFiles(sampleDirectory, "*.txt").[0]
+        let actual = sampleTxtFilePath |> toFilePath
+        actual = None |> should be True
     
+    [<Fact>]
+    let ``Unpacked Dir is not yet exisitng dir`` () =
+        let actual = sampleDirectory |> toPackDirPath
+        actual = InvalidDirPath |> should be True
+
+    [<Theory>]
+    [<InlineData(null); InlineData(""); (*InlineData("qwerty")*)>]
+    let ``Unpacked Dir is valid path to yet exisitng dir`` (filePath) = 
+        let actual = filePath |> toPackDirPath
+        actual = InvalidDirPath |> should be True
+
     [<Fact>]
     let ``Unpacking valid epub file should result in path to original file and to directory``() = 
-        let sampleDirectory = Path.Combine(Directory.GetCurrentDirectory(), "SampleData")
         let sampleFile = Directory.GetFiles(sampleDirectory, "*.epub").[0]
         let fileName = Path.GetFileNameWithoutExtension(sampleFile)
 
         let saveDirName = sprintf "%s_%s" fileName (Guid.NewGuid().ToString())
         let saveDirPath = Path.Combine(sampleDirectory, saveDirName)
 
-        let expected = ((sampleFile |> toFilePath), saveDirPath |> toDirPath) |> UnpackedPath
-        let actual = unpackBook (fileName |> toFilePath) (saveDirPath)
+        let expected = 
+            ((sampleFile |> toFilePath |> Option.get), UnpackedDirPath saveDirPath) 
+            |> UnpackedPath
+        let actual = unpackBook (sampleFile |> toFilePath |> Option.get) (saveDirPath)
         
-        expected = actual |> should be False //work in progress
-        Directory.Exists(saveDirPath) |> should be False //work in progress
-        //ToDo toDirPath must return false for directory that already exist
+        actual.IsSome |> should be True
+        expected = actual.Value |> should be True
+        Directory.Exists(saveDirPath) |> should be False //ToDo next work item
+
