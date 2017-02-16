@@ -4,28 +4,51 @@ module EpubProcessor =
     open System.IO
     open System.Text.RegularExpressions
     open BookMate.Core.Helpers.RegexHelper
-
-    type FilePath = FilePath of string
+    open System
+    open System.Text.RegularExpressions
+    
+    type FilePath = 
+        | FilePath of string
     
     type DirPath = 
-        | ToPackDirPath of string
+        | PackDirPath of string
         | UnpackedDirPath of string
         | InvalidDirPath
     
-    type EpubBookPath = UnpackedPath of FilePath * DirPath
+    type EpubBookPath = 
+        | UnpackedPath of FilePath * DirPath
     
-    let invalidPatter = "" //"[" + Regex.Escape(Path.GetInvalidPathChars()) + "]"
-
-    let isPlausibleDirPath = function
-        | Regex invalidPatter v -> false
-        | _ -> false
-
+    let directoryIsValid dirPath = 
+        let isValid = 
+            try 
+                DirectoryInfo(dirPath) |> ignore
+                true
+            with _ -> false
+        isValid
+    
     let toPackDirPath (dirPath : string) = 
+        let removeDoubleSlash (p : string) = p.Replace("\\", @"\")
+        let isNotRelative = Path.IsPathRooted
+        
+        let notContainInvalidChars = 
+            let invalidPatter = Path.GetInvalidPathChars() |> string
+            let invalidCharRegex = new Regex("[" + Regex.Escape(invalidPatter) + "]")
+            let notContainInvalidChars = invalidCharRegex.IsMatch >> not
+            notContainInvalidChars
+        
+        let validPatternPath = 
+            let validPathRegex = new Regex("^([a-zA-Z]:)?(\\\\[^<>:\"/\\\\|?*]+)+\\\\?$")
+            validPathRegex.IsMatch
+        
+        let isValidPath path = 
+            let p = removeDoubleSlash path
+            notContainInvalidChars p && validPatternPath p && isNotRelative p
+        
         match dirPath with
-        | "" | null -> InvalidDirPath
-        | dp when dp.Trim() <> ""-> 
-                if not (System.IO.Directory.Exists dirPath) then ToPackDirPath dirPath
-                else InvalidDirPath
+        | null | "" -> InvalidDirPath
+        | dp when isValidPath dirPath -> 
+            if not (System.IO.Directory.Exists dirPath) then PackDirPath dirPath
+            else InvalidDirPath
         | _ -> InvalidDirPath
     
     let toFilePath (filePath : string) = 
@@ -36,6 +59,5 @@ module EpubProcessor =
     
     let unpackBook (bookPath : FilePath) (savePath : string) : EpubBookPath option = 
         match bookPath with
-        | FilePath filePath -> 
-            UnpackedPath(bookPath, UnpackedDirPath savePath) |> Some
+        | FilePath filePath -> UnpackedPath(bookPath, UnpackedDirPath savePath) |> Some
         | _ -> None
