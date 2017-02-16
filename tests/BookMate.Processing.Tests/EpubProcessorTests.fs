@@ -64,8 +64,11 @@ module EpubProcessorTests =
         let actual = 
             unpackBook (sampleFile
                         |> toFilePath
-                        |> Option.get) (saveDirPath)
-        
+                        |> Option.get) (saveDirPath |> toPackDirPath)
+     
         actual.IsSome |> should be True
         expected = actual.Value |> should be True
-        Directory.Exists(saveDirPath) |> should be False //ToDo next work item
+
+        //ToDo directory must exist
+        Directory.Exists(saveDirPath) |> should be False 
+        //ToDo directory must not be empty

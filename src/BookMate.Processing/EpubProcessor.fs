@@ -18,14 +18,6 @@ module EpubProcessor =
     type EpubBookPath = 
         | UnpackedPath of FilePath * DirPath
     
-    let directoryIsValid dirPath = 
-        let isValid = 
-            try 
-                DirectoryInfo(dirPath) |> ignore
-                true
-            with _ -> false
-        isValid
-    
     let toPackDirPath (dirPath : string) = 
         let removeDoubleSlash (p : string) = p.Replace("\\", @"\")
         let isNotRelative = Path.IsPathRooted
@@ -57,7 +49,12 @@ module EpubProcessor =
             else None
         else None
     
-    let unpackBook (bookPath : FilePath) (savePath : string) : EpubBookPath option = 
-        match bookPath with
-        | FilePath filePath -> UnpackedPath(bookPath, UnpackedDirPath savePath) |> Some
-        | _ -> None
+    let toUnpackedDirPath (path:string) = 
+        //todo make sure that directory exist
+        //todo make sure that it is not empty 
+        UnpackedDirPath path
+    
+    let unpackBook (bookPath : FilePath) (savePath : DirPath) : EpubBookPath option = 
+            match (bookPath, savePath) with
+            | (FilePath fp, PackDirPath pdp) -> UnpackedPath(bookPath, UnpackedDirPath pdp) |> Some
+            | _ -> None
