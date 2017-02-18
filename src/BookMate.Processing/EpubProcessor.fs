@@ -48,30 +48,21 @@ module EpubProcessor =
             else None
         else None
     
-    let toUnpackedDirPath (path:string) = 
-        //todo make sure that directory exist
-        //todo make sure that it is not empty 
-        UnpackedDirPath path
-    
     let getFileName = Path.GetFileNameWithoutExtension
 
     let unpackBook (bookPath : FilePath) (savePath : DirPath) : EpubBookPath option = 
             match (bookPath, savePath) with
             | (FilePath fp, PackDirPath pdp) -> 
+                        createFolder pdp |> ignore
+
                         let fileName = getFileName fp
-                        
-                        let tmpPath = pdp
-                        createFolder tmpPath |> ignore
-                        let tmpFileName = tmpPath +/ (fileName + ".zip")
+                        let zipFileName = pdp +/ (fileName + ".zip")
 
-                        //creating zip and ucompress it
-                        do File.Copy(fp, tmpFileName)
-                        //needed to allow deleting of this file
-                        do File.SetAttributes(tmpFileName, FileAttributes.Normal) 
+                        //set normal attribute to allow deletion
+                        do File.Copy(fp, zipFileName)
+                        do File.SetAttributes(zipFileName, FileAttributes.Normal) 
+                        do unzipFile zipFileName pdp
+                        do File.Delete zipFileName
 
-                        let tmpUnCompressedBookPath = tmpPath
-                        do unzipFile tmpFileName tmpUnCompressedBookPath
-                        do File.Delete tmpFileName
-
-                        UnpackedPath(bookPath, UnpackedDirPath tmpUnCompressedBookPath) |> Some
+                        UnpackedPath(bookPath, UnpackedDirPath pdp) |> Some
             | _ -> None
