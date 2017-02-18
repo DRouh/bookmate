@@ -10,7 +10,7 @@
     }
   },
   "dependencies": {
-    "xunit": "2.2.0-beta5-*",
+    "xunit": "2.2.0-*",
     "FsUnit.Xunit": "2.3.0-*",
     "dotnet-test-xunit": "2.2.0-preview2-*",
     "BookMate.Integration": {
@@ -37,7 +37,7 @@
   },
   "testRunner": "xunit",
   "tools": {
-    "xunit.runner.console": "2.1.0",
+    "xunit.runner.console": "2.2.0-*",
     "dotnet-compile-fsc": {
       "version": "1.0.0-*",
       "imports": [

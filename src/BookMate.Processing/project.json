@@ -24,8 +24,8 @@
       "dependencies": {
         "HtmlAgilityPack.NetCore": "1.5.0.1",
         "NETStandard.Library": "1.6.0",
-        "System.IO": "*",
-        "System.IO.Compression": "*"
+        "System.IO": "4.3.0",
+        "System.IO.Compression": "4.3.0"
       },
       "FSharp.Core": "4.1.0"
     }
