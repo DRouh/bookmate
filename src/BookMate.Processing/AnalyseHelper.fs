@@ -17,7 +17,7 @@ module AnalyseHelper =
     let tagWords = tagWords' (getPosTagger())
 
     let computeWordPosStat = 
-        Array.where (fun (word:string, pos:CommonPoS) -> isNotNull word)
+        Array.where (fun (word:string, pos:CommonPoS) -> word <> null)
         >> Array.Parallel.map (fun (word:string, pos) -> (word.ToLower(), pos))
         >> Array.groupBy (fun (word, _) -> word)
         >> Array.Parallel.map (fun (word, group) -> 

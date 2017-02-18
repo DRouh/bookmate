@@ -26,7 +26,7 @@
     "netstandard1.6": {
       "dependencies": {
         "NETStandard.Library": "1.6.0",
-        "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-161205",
+        "FSharp.Core": "4.1.0",
         "System.IO": "*",
         "System.IO.Compression": "*"
       }
