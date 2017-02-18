@@ -30,12 +30,10 @@ module IOHelper =
     
     let unzipFile filePath targetPath = 
         let fileName = getFileNameWithoutExtension filePath
-        printfn "Uncompressing %s" fileName
         use archive = ZipFile.Open(filePath, ZipArchiveMode.Read)
         do archive.ExtractToDirectory(targetPath)
     
     let zipFile directoryPath targetPath = 
-        printfn "Compressing %s" directoryPath
         do ZipFile.CreateFromDirectory(directoryPath, targetPath)
 
     let createFolder path = Directory.CreateDirectory(path)

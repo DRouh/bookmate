@@ -6,17 +6,16 @@ module EpubProcessor =
     open BookMate.Core.Helpers.RegexHelper
     open System
     open System.Text.RegularExpressions
+    open BookMate.Core.Helpers.IOHelper
     
-    type FilePath = 
-        | FilePath of string
+    type FilePath = FilePath of string
     
     type DirPath = 
         | PackDirPath of string
         | UnpackedDirPath of string
         | InvalidDirPath
     
-    type EpubBookPath = 
-        | UnpackedPath of FilePath * DirPath
+    type EpubBookPath = UnpackedPath of FilePath * DirPath
     
     let toPackDirPath (dirPath : string) = 
         let removeDoubleSlash (p : string) = p.Replace("\\", @"\")
@@ -54,7 +53,25 @@ module EpubProcessor =
         //todo make sure that it is not empty 
         UnpackedDirPath path
     
+    let getFileName = Path.GetFileNameWithoutExtension
+
     let unpackBook (bookPath : FilePath) (savePath : DirPath) : EpubBookPath option = 
             match (bookPath, savePath) with
-            | (FilePath fp, PackDirPath pdp) -> UnpackedPath(bookPath, UnpackedDirPath pdp) |> Some
+            | (FilePath fp, PackDirPath pdp) -> 
+                        let fileName = getFileName fp
+                        
+                        let tmpPath = pdp
+                        createFolder tmpPath |> ignore
+                        let tmpFileName = tmpPath +/ (fileName + ".zip")
+
+                        //creating zip and ucompress it
+                        do File.Copy(fp, tmpFileName)
+                        //needed to allow deleting of this file
+                        do File.SetAttributes(tmpFileName, FileAttributes.Normal) 
+
+                        let tmpUnCompressedBookPath = tmpPath
+                        do unzipFile tmpFileName tmpUnCompressedBookPath
+                        do File.Delete tmpFileName
+
+                        UnpackedPath(bookPath, UnpackedDirPath tmpUnCompressedBookPath) |> Some
             | _ -> None

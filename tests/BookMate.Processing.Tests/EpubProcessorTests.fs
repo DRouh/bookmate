@@ -69,6 +69,6 @@ module EpubProcessorTests =
         actual.IsSome |> should be True
         expected = actual.Value |> should be True
 
-        //ToDo directory must exist
-        Directory.Exists(saveDirPath) |> should be False 
-        //ToDo directory must not be empty
+        Directory.Exists(saveDirPath) |> should be True
+        Directory.GetFiles(saveDirPath) |> Seq.isEmpty |> should be False
+        do Directory.Delete(saveDirPath, true)
