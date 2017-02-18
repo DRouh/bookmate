@@ -5,7 +5,7 @@
     "compile": {
       "includeFiles": [
         "AnalyseTests.fs",
-        "EpubProcessorTests.fs",
+        "EpubIOTests.fs",
         "StanfordTaggerTests.fs"
       ]
     }

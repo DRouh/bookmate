@@ -1,6 +1,6 @@
 namespace BookMate.Processing.Tests
 
-module EpubProcessorTests = 
+module EpubIOTests = 
     open System
     open System.IO
     open Xunit
