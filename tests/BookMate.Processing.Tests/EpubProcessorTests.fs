@@ -6,7 +6,7 @@ module EpubProcessorTests =
     open Xunit
     open FsUnit.Xunit
     open BookMate.Processing
-    open BookMate.Processing.EpubProcessor
+    open BookMate.Processing.EpubIO
     open BookMate.Processing.POS
     open BookMate.Processing.Analyse
     open BookMate.Processing.AnalyseHelper

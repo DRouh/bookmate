@@ -1,6 +1,6 @@
 ﻿namespace BookMate.Processing
 
-module EpubProcessor = 
+module EpubIO = 
     open System.IO
     open System.Text.RegularExpressions
     open BookMate.Core.Helpers.RegexHelper
@@ -47,7 +47,7 @@ module EpubProcessor =
             if filePath.ToLower().EndsWith(".epub") then (FilePath filePath) |> Some
             else None
         else None
-    
+        
     let getFileName = Path.GetFileNameWithoutExtension
 
     let unpackBook (bookPath : FilePath) (savePath : DirPath) : EpubBookPath option = 
