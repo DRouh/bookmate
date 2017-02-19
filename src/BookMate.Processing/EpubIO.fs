@@ -1,21 +1,20 @@
 ﻿namespace BookMate.Processing
 
 module EpubIO = 
+    open System
     open System.IO
     open System.Text.RegularExpressions
     open BookMate.Core.Helpers.RegexHelper
-    open System
-    open System.Text.RegularExpressions
     open BookMate.Core.Helpers.IOHelper
     
-    type FilePath = FilePath of string
+    type EpubFilePath = EpubFilePath of string
     
     type DirPath = 
         | PackDirPath of string
         | UnpackedDirPath of string
         | InvalidDirPath
     
-    type EpubBookPath = UnpackedPath of FilePath * DirPath
+    type EpubBookPath = UnpackedPath of EpubFilePath * DirPath
     
     let toPackDirPath (dirPath : string) = 
         let removeDoubleSlash (p : string) = p.Replace("\\", @"\")
@@ -44,15 +43,15 @@ module EpubIO =
     
     let toFilePath (filePath : string) = 
         if System.IO.File.Exists filePath then 
-            if filePath.ToLower().EndsWith(".epub") then (FilePath filePath) |> Some
+            if filePath.ToLower().EndsWith(".epub") then (EpubFilePath filePath) |> Some
             else None
         else None
         
     let getFileName = Path.GetFileNameWithoutExtension
 
-    let unpackBook (bookPath : FilePath) (savePath : DirPath) : EpubBookPath option = 
+    let unpackBook (bookPath : EpubFilePath) (savePath : DirPath) : EpubBookPath option = 
             match (bookPath, savePath) with
-            | (FilePath fp, PackDirPath pdp) -> 
+            | (EpubFilePath fp, PackDirPath pdp) -> 
                         createFolder pdp |> ignore
 
                         let fileName = getFileName fp
