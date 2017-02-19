@@ -31,7 +31,7 @@ module EpubIOTests =
     [<Fact>]
     let ``Unpacked Dir is not yet exisitng dir``() = 
         let actual = sampleDirectory |> toPackDirPath
-        actual = InvalidDirPath |> should be True
+        actual = None |> should be True
     
     [<Theory>]
     [<InlineData(null); InlineData(""); InlineData("qwerty")>]
@@ -39,14 +39,14 @@ module EpubIOTests =
     [<InlineData("~/gibberish"); InlineData("../gibberish")>]
     let ``Unpacked Dir should be a creatable path to not yet exisitng dir`` (filePath) = 
         let actual = filePath |> toPackDirPath
-        actual = InvalidDirPath |> should be True
+        actual = None |> should be True
     
     [<Fact>]
     let ``Unpacked Dir is valid path to not yet exisitng dir``() = 
         let tmpPath = Path.Combine(sampleDirectory, "validdic")
         let actual = tmpPath |> toPackDirPath
         let expected = PackDirPath tmpPath
-        actual = expected |> should be True
+        actual.Value = expected |> should be True
     
     [<Fact>]
     let ``Unpacking valid epub file should result in path to original file and to directory``() = 
@@ -62,9 +62,8 @@ module EpubIOTests =
             |> UnpackedPath
         
         let actual = 
-            unpackBook (sampleFile
-                        |> toFilePath
-                        |> Option.get) (saveDirPath |> toPackDirPath)
+            unpackBook (sampleFile |> toFilePath |> Option.get) 
+                       (saveDirPath |> toPackDirPath |> Option.get)
      
         actual.IsSome |> should be True
         expected = actual.Value |> should be True

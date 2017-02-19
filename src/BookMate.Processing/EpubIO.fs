@@ -9,12 +9,11 @@ module EpubIO =
     
     type EpubFilePath = EpubFilePath of string
     
-    type DirPath = 
-        | PackDirPath of string
-        | UnpackedDirPath of string
-        | InvalidDirPath
+    type UnpackedDirPath = UnpackedDirPath of string
+    type PackDirPath = PackDirPath of string
+        
     
-    type EpubBookPath = UnpackedPath of EpubFilePath * DirPath
+    type UnpackedPath = UnpackedPath of EpubFilePath * UnpackedDirPath
     
     let toPackDirPath (dirPath : string) = 
         let removeDoubleSlash (p : string) = p.Replace("\\", @"\")
@@ -35,11 +34,11 @@ module EpubIO =
             notContainInvalidChars p && validPatternPath p && isNotRelative p
         
         match dirPath with
-        | null | "" -> InvalidDirPath
+        | null | "" -> None
         | dp when isValidPath dirPath -> 
-            if not (System.IO.Directory.Exists dirPath) then PackDirPath dirPath
-            else InvalidDirPath
-        | _ -> InvalidDirPath
+            if not (System.IO.Directory.Exists dirPath) then Some (PackDirPath dirPath)
+            else None
+        | _ -> None
     
     let toFilePath (filePath : string) = 
         if System.IO.File.Exists filePath then 
@@ -49,19 +48,17 @@ module EpubIO =
         
     let getFileName = Path.GetFileNameWithoutExtension
 
-    let unpackBook (bookPath : EpubFilePath) (savePath : DirPath) : EpubBookPath option = 
-            match (bookPath, savePath) with
-            | (EpubFilePath fp, PackDirPath pdp) -> 
-                        createFolder pdp |> ignore
+    let unpackBook (bookPath : EpubFilePath) (savePath : PackDirPath) : UnpackedPath option = 
+        let (EpubFilePath fp, PackDirPath pdp) = (bookPath, savePath)
+        createFolder pdp |> ignore
 
-                        let fileName = getFileName fp
-                        let zipFileName = pdp +/ (fileName + ".zip")
+        let fileName = getFileName fp
+        let zipFileName = pdp +/ (fileName + ".zip")
 
-                        //set normal attribute to allow deletion
-                        do File.Copy(fp, zipFileName)
-                        do File.SetAttributes(zipFileName, FileAttributes.Normal) 
-                        do unzipFile zipFileName pdp
-                        do File.Delete zipFileName
+        //set normal attribute to allow deletion
+        do File.Copy(fp, zipFileName)
+        do File.SetAttributes(zipFileName, FileAttributes.Normal) 
+        do unzipFile zipFileName pdp
+        do File.Delete zipFileName
 
-                        UnpackedPath(bookPath, UnpackedDirPath pdp) |> Some
-            | _ -> None
+        UnpackedPath(bookPath, UnpackedDirPath pdp) |> Some
