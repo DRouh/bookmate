@@ -6,6 +6,7 @@
       "includeFiles": [
         "AnalyseTests.fs",
         "EpubIOTests.fs",
+        "EpubProcessorTests.fs",
         "StanfordTaggerTests.fs"
       ]
     }
