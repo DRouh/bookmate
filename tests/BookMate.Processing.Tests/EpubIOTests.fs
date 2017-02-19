@@ -11,6 +11,8 @@ module EpubIOTests =
     open BookMate.Processing.Analyse
     open BookMate.Processing.AnalyseHelper
     open BookMate.Processing.DomainModel
+    open BookMate.Processing.Epub
+    open BookMate.Processing.EpubIO
     
     let flip f a b = f b a
     let unpackBook' = flip unpackBook

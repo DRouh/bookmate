@@ -6,14 +6,7 @@ module EpubIO =
     open System.Text.RegularExpressions
     open BookMate.Core.Helpers.RegexHelper
     open BookMate.Core.Helpers.IOHelper
-    
-    type EpubFilePath = EpubFilePath of string
-    
-    type UnpackedDirPath = UnpackedDirPath of string
-    type PackDirPath = PackDirPath of string
-        
-    
-    type UnpackedPath = UnpackedPath of EpubFilePath * UnpackedDirPath
+    open BookMate.Processing.Epub
     
     let toPackDirPath (dirPath : string) = 
         let removeDoubleSlash (p : string) = p.Replace("\\", @"\")

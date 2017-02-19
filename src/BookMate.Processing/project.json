@@ -12,7 +12,9 @@
         "Analyse.fs",
         "TranslationDownloadHelper.fs",
         "AnalyseHelper.fs",
-        "EpubIO.fs"
+        "Epub.fs",
+        "EpubIO.fs",
+        "EpubProcessor.fs"
       ]
     }
   },
