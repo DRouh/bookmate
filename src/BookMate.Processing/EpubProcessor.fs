@@ -12,17 +12,17 @@ module EpubProcessor =
     
     and EpubFile = 
         { name : string
-          path : EpubFilePath
+          path : FilePath
           content : string }
 
-    let addToBookToProcess (file: EpubFilePath) = 
+    let addToBookToProcess (file: FilePath) = 
         { name = ""; path = file; content = "" }
     
     let toAnyHtml = toFilePath AnyHtml
 
-    let readBook (unpackedBook : UnpackedPath) : BookToProcess = 
+    let readBook (unpackedBook : UnpackedPath) : BookToProcess option = 
         match unpackedBook with
-        | UnpackedPath (FilePath filePath, UnpackedDirPath dirPath) ->
+        | UnpackedPath (EpubFilePath filePath, UnpackedDirPath dirPath) ->
             let files = 
                 Directory.GetFiles(dirPath, "*.*html", System.IO.SearchOption.AllDirectories)
                 |> Seq.toList
@@ -30,4 +30,5 @@ module EpubProcessor =
                 |> List.map addToBookToProcess
 
             { Files = files
-              Location = unpackedBook }
+              Location = unpackedBook } |> Some
+        | _ -> None
