@@ -17,17 +17,18 @@ module EpubIOTests =
     let flip f a b = f b a
     let unpackBook' = flip unpackBook
     let sampleDirectory = Path.Combine(Directory.GetCurrentDirectory(), "SampleData")
-    
+    let toEpubFilePath = toFilePath Epub
+
     [<Theory>]
     [<InlineData(null); InlineData(""); InlineData("c:\\q1q1w1"); InlineData("c:\\q1q1w1.gibberish")>]
     let ``Path to nonexistent file is not valid FilePath`` (filePath) = 
-        let actual = filePath |> toFilePath
+        let actual = filePath |> toEpubFilePath
         actual = None |> should be True
     
     [<Fact>]
     let ``Path to existing non-epub file is not valid FilePath``() = 
         let sampleTxtFilePath = Directory.GetFiles(sampleDirectory, "*.txt").[0]
-        let actual = sampleTxtFilePath |> toFilePath
+        let actual = sampleTxtFilePath |> toEpubFilePath
         actual = None |> should be True
     
     [<Fact>]
@@ -59,12 +60,12 @@ module EpubIOTests =
         
         let expected = 
             ((sampleFile
-              |> toFilePath
+              |> toEpubFilePath
               |> Option.get), UnpackedDirPath saveDirPath)
             |> UnpackedPath
         
         let actual = 
-            unpackBook (sampleFile |> toFilePath |> Option.get) 
+            unpackBook (sampleFile |> toEpubFilePath |> Option.get) 
                        (saveDirPath |> toPackDirPath |> Option.get)
      
         actual.IsSome |> should be True

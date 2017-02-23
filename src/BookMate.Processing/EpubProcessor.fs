@@ -7,20 +7,27 @@ module EpubProcessor =
     open BookMate.Processing.EpubIO
     
     type BookToProcess = 
-        { Files : seq<EpubFile>
+        { Files : List<EpubFile>
           Location : UnpackedPath }
     
     and EpubFile = 
         { name : string
           path : EpubFilePath
           content : string }
+
+    let addToBookToProcess (file: EpubFilePath) = 
+        { name = ""; path = file; content = "" }
     
+    let toAnyHtml = toFilePath AnyHtml
+
     let readBook (unpackedBook : UnpackedPath) : BookToProcess = 
-        let UnpackedPath (EpubFilePath filePath, UnpackedDirPath dirPath) = unpackedBook
-        { Files = 
-              [ { name = ""
-                  path = EpubFilePath ""
-                  content = "" } ]
-          Location = unpackedBook }
-    //let contentFiles = Directory.GetFiles(dirPath, "*.*html", System.IO.SearchOption.AllDirectories)
-    //{Files = [{name= ""; path = x; content = ""}]}
+        match unpackedBook with
+        | UnpackedPath (FilePath filePath, UnpackedDirPath dirPath) ->
+            let files = 
+                Directory.GetFiles(dirPath, "*.*html", System.IO.SearchOption.AllDirectories)
+                |> Seq.toList
+                |> List.choose toAnyHtml
+                |> List.map addToBookToProcess
+
+            { Files = files
+              Location = unpackedBook }

@@ -33,16 +33,22 @@ module EpubIO =
             else None
         | _ -> None
     
-    let toFilePath (filePath : string) = 
+    let hasExtension (ext:Extension) (filePath:string) = 
+        match (ext, filePath) with
+        | (Epub, fp) when fp.ToLower().EndsWith(".epub") -> true
+        | (AnyHtml, fp) when isMatch "^.*\.(html|xhtml)$" (fp.ToLower()) -> true
+        | _ -> false
+
+    let toFilePath (fileExt: Extension) (filePath : string) = 
         if System.IO.File.Exists filePath then 
-            if filePath.ToLower().EndsWith(".epub") then (EpubFilePath filePath) |> Some
+            if hasExtension fileExt filePath then (FilePath filePath) |> Some
             else None
         else None
         
     let getFileName = Path.GetFileNameWithoutExtension
 
     let unpackBook (bookPath : EpubFilePath) (savePath : PackDirPath) : UnpackedPath option = 
-        let (EpubFilePath fp, PackDirPath pdp) = (bookPath, savePath)
+        let (FilePath fp, PackDirPath pdp) = (bookPath, savePath)
         createFolder pdp |> ignore
 
         let fileName = getFileName fp
