@@ -11,12 +11,18 @@ module EpubProcessor =
           Location : UnpackedPath }
     
     and EpubFile = 
-        { name : string
-          path : FilePath
-          content : string }
+        { Name : string
+          Path : FilePath
+          Content : string }
+    
+    let getFileName = Path.GetFileNameWithoutExtension
+    let readAllText = File.ReadAllText
 
-    let addToBookToProcess (file: FilePath) = 
-        { name = ""; path = file; content = "" }
+    let toEpubReadFile (file: FilePath) = 
+        let (AnyHtmlFilePath fp) = file
+        let fileName =  getFileName fp
+        let fileContent = readAllText fp
+        { Name = fileName; Path = file; Content = fileContent }
     
     let toAnyHtml = toFilePath AnyHtml
 
@@ -27,7 +33,7 @@ module EpubProcessor =
                 Directory.GetFiles(dirPath, "*.*html", System.IO.SearchOption.AllDirectories)
                 |> Seq.toList
                 |> List.choose toAnyHtml
-                |> List.map addToBookToProcess
+                |> List.map toEpubReadFile
 
             { Files = files
               Location = unpackedBook } |> Some

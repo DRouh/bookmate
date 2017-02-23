@@ -21,7 +21,7 @@ module EpubProcessorTests =
     let toEpubFilePath = toFilePath Epub
 
     [<Fact>]
-    let ``Read book should have valid data about file locations``() = 
+    let ``Read book should contain valid data about all files``() = 
         let saveDirPath = getSaveDirPath()
 
         let epubFile = sampleFile |> toEpubFilePath |> Option.get
@@ -31,13 +31,16 @@ module EpubProcessorTests =
         let expectedFiles =  Directory.GetFiles(saveDirPath, "*.*html", System.IO.SearchOption.AllDirectories) |> Seq.toList
         
         let actualReadBook = readBook unpackedBook |> Option.get
-
         let actualFileCount = actualReadBook.Files |> List.length
-        let actualFilePaths = actualReadBook.Files |> List.map ((fun f -> f.path) >> (function | AnyHtmlFilePath efp -> efp))
+        let actualFilePaths = actualReadBook.Files |> List.map ((fun f -> f.Path) >> (function | AnyHtmlFilePath efp -> efp))
+        let actualFileContents = actualReadBook.Files |> List.map (fun f -> f.Content) |> List.reduce (fun a c -> a + c)
+        let actualFileNames = actualReadBook.Files |> List.map (fun f -> f.Name)
         
+        //validate contents of a read book
         actualReadBook.Location = unpackedBook |> should be True
         actualFilePaths = expectedFiles |> should be True
+        actualFileContents |> (String.IsNullOrEmpty >> not) |> should be True
+        actualFileNames = (expectedFiles |> List.map (Path.GetFileNameWithoutExtension)) |> should be True
+
         //clean up
         do Directory.Delete(saveDirPath, true)
-        
-    
