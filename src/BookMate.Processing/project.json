@@ -5,6 +5,7 @@
     "compilerName": "fsc",
     "compile": {
       "includeFiles": [
+        "HtmlUtils.fs",
         "DomainModel.fs",
         "POS.fs",
         "StanfordNlp.fs",

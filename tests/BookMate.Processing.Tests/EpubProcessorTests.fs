@@ -5,6 +5,7 @@ module EpubProcessorTests =
     open System.IO
     open Xunit
     open FsUnit.Xunit
+    open BookMate.Processing
     open BookMate.Processing.Epub
     open BookMate.Processing.EpubIO
     open BookMate.Processing.EpubProcessor
@@ -56,3 +57,16 @@ module EpubProcessorTests =
         actualFileNames = (expectedFiles |> List.map (Path.GetFileNameWithoutExtension)) |> should be True
         //clean up
         do Directory.Delete(saveDirPath, true)
+    
+
+
+    
+    
+    [<Fact>]
+    let ``Should read all text from *HTML file`` = 
+        let fileText = Path.Combine(sampleDirectory, "epub30-titlepage.xhtml") |> File.ReadAllText
+        let html = HtmlUtils.loadHtml fileText
+        let actualText = HtmlUtils.getTextFromHtml html
+        let expretedText = Path.Combine(sampleDirectory, "epub30-titlepage.txt") |> File.ReadAllLines
+
+        actualText = expretedText |> should be True
