@@ -9,7 +9,6 @@ module EpubIOTests =
     open BookMate.Processing.POS
     open BookMate.Processing.Analyse.AnalyseDomain
     open BookMate.Processing.Analyse.AnalyseUtils
-    open BookMate.Processing.DomainModel
     open BookMate.Processing.Epub.Domain
     open BookMate.Processing.Epub.IO
     
