@@ -34,5 +34,15 @@ module HtmlUtils =
 
   let updateTextNode (node : HtmlTextNode) : HtmlTextNode = 
     let updatedNode = (node.CloneNode true) :?> HtmlTextNode
-    updatedNode.Text <- updatedNode.Text + " {{Hi fuck you}}"
+    updatedNode.Text <- updatedNode.Text + " {{Hi, how are you?}}"
     updatedNode
+
+  let processNodes (html : HtmlDocument) : HtmlDocument = 
+    let textNodes = html.DocumentNode.SelectNodes("//p//text()")
+    let mutable test = true
+    for p in textNodes do
+         if p :? HtmlTextNode then 
+             let node = p :?> HtmlTextNode
+             let updatedNode = updateTextNode node
+             p.ParentNode.ReplaceChild(updatedNode, p) |> ignore
+    html //todo new instance

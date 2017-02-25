@@ -12,7 +12,9 @@ module EpubProcessorTests =
     
     let sampleDirectory = Path.Combine(Directory.GetCurrentDirectory(), "SampleData")
     let sampleFile = Directory.GetFiles(sampleDirectory, "*.epub").[0]
-    
+    let sampleHtmlDoc = Path.Combine(sampleDirectory, "epub30-titlepage.xhtml")
+    let sampleTxtDoc = Path.Combine(sampleDirectory, "epub30-titlepage.txt")
+
     let getSaveDirPath() = 
         let sampleFileName = Path.GetFileNameWithoutExtension(sampleFile)
         Path.Combine(sampleDirectory, sprintf "%s_%s" sampleFileName (Guid.NewGuid().ToString()))
@@ -60,13 +62,16 @@ module EpubProcessorTests =
     
     [<Fact>]
     let ``Should read all text from *HTML file`` () = 
-        let fileText = Path.Combine(sampleDirectory, "epub30-titlepage.xhtml") |> File.ReadAllText
+        let fileText = sampleHtmlDoc|> File.ReadAllText
         let html = HtmlUtils.loadHtml fileText
         let actualText = HtmlUtils.getTextFromHtml html
-        let expretedText = Path.Combine(sampleDirectory, "epub30-titlepage.txt") |> File.ReadAllLines
+        let expretedText = sampleTxtDoc |> File.ReadAllLines
         actualText = expretedText |> should be True
 
     [<Fact>]
     let ``Should update text node in *HTML document`` () =
-        
-        1 =1 |> should be True
+        let fileText = sampleHtmlDoc |> File.ReadAllText
+        let html = HtmlUtils.loadHtml fileText
+        let updatedHtml = HtmlUtils.processNodes html
+        HtmlUtils.saveHtml updatedHtml "f:\\1.xhtml"
+        1 = 1 |> should be True
