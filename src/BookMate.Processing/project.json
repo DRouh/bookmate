@@ -10,9 +10,9 @@
         "POS.fs",
         "StanfordNlp.fs",
         "StanfordTagger.fs",
-        "Analyse.fs",
         "TranslationDownloadHelper.fs",
-        "AnalyseHelper.fs",
+        "Analyse/AnalyseDomain.fs",
+        "Analyse/AnalyseUtils.fs",
         "Epub/Domain.fs",
         "Epub/IO.fs",
         "Epub/Processor.fs"
