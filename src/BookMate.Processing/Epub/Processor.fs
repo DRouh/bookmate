@@ -1,10 +1,10 @@
-namespace BookMate.Processing
+namespace BookMate.Processing.Epub
 
-module EpubProcessor = 
+module Processor = 
     open System
     open System.IO
-    open BookMate.Processing.Epub
-    open BookMate.Processing.EpubIO
+    open BookMate.Processing.Epub.Domain
+    open BookMate.Processing.Epub.IO
     
     let getFileName = Path.GetFileNameWithoutExtension
     let readAllText = File.ReadAllText

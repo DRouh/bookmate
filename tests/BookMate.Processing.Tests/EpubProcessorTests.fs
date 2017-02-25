@@ -6,9 +6,9 @@ module EpubProcessorTests =
   open Xunit
   open FsUnit.Xunit
   open BookMate.Processing
-  open BookMate.Processing.Epub
-  open BookMate.Processing.EpubIO
-  open BookMate.Processing.EpubProcessor
+  open BookMate.Processing.Epub.Domain
+  open BookMate.Processing.Epub.IO
+  open BookMate.Processing.Epub.Processor
     
   let sampleDirectory = Path.Combine(Directory.GetCurrentDirectory(), "SampleData")
   let sampleFile = Directory.GetFiles(sampleDirectory, "*.epub").[0]

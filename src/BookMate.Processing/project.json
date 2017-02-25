@@ -13,9 +13,9 @@
         "Analyse.fs",
         "TranslationDownloadHelper.fs",
         "AnalyseHelper.fs",
-        "Epub.fs",
-        "EpubIO.fs",
-        "EpubProcessor.fs"
+        "Epub/Domain.fs",
+        "Epub/IO.fs",
+        "Epub/Processor.fs"
       ]
     }
   },

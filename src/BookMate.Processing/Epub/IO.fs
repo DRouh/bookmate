@@ -1,12 +1,12 @@
-﻿namespace BookMate.Processing
+﻿namespace BookMate.Processing.Epub
 
-module EpubIO = 
+module IO = 
     open System
     open System.IO
     open System.Text.RegularExpressions
     open BookMate.Core.Helpers.RegexHelper
     open BookMate.Core.Helpers.IOHelper
-    open BookMate.Processing.Epub
+    open BookMate.Processing.Epub.Domain
     
     let toPackDirPath (dirPath : string) = 
         let removeDoubleSlash (p : string) = p.Replace("\\", @"\")

@@ -6,13 +6,12 @@ module EpubIOTests =
     open Xunit
     open FsUnit.Xunit
     open BookMate.Processing
-    open BookMate.Processing.EpubIO
     open BookMate.Processing.POS
     open BookMate.Processing.Analyse
     open BookMate.Processing.AnalyseHelper
     open BookMate.Processing.DomainModel
-    open BookMate.Processing.Epub
-    open BookMate.Processing.EpubIO
+    open BookMate.Processing.Epub.Domain
+    open BookMate.Processing.Epub.IO
     
     let flip f a b = f b a
     let unpackBook' = flip unpackBook

@@ -1,6 +1,6 @@
-namespace BookMate.Processing
+namespace BookMate.Processing.Epub
 
-module Epub = 
+module Domain = 
     type Extension = 
         | Epub
         | AnyHtml
