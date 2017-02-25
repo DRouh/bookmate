@@ -4,6 +4,7 @@
     "compilerName": "fsc",
     "compile": {
       "includeFiles": [
+        "HtmlUtilsTests.fs",
         "AnalyseTests.fs",
         "EpubIOTests.fs",
         "EpubProcessorTests.fs",
