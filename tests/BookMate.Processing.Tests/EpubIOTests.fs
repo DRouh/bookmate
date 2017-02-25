@@ -7,8 +7,8 @@ module EpubIOTests =
     open FsUnit.Xunit
     open BookMate.Processing
     open BookMate.Processing.POS
-    open BookMate.Processing.Analyse
-    open BookMate.Processing.AnalyseHelper
+    open BookMate.Processing.Analyse.AnalyseDomain
+    open BookMate.Processing.Analyse.AnalyseUtils
     open BookMate.Processing.DomainModel
     open BookMate.Processing.Epub.Domain
     open BookMate.Processing.Epub.IO

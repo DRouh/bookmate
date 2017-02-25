@@ -1,6 +1,6 @@
-namespace BookMate.Processing
+namespace BookMate.Processing.Analyse
 
-module Analyse = 
-    open POS
-    type Tokenizer = bool -> string -> seq<string>
-    type Tagger = string -> seq<string*CommonPoS>
+module AnalyseDomain = 
+  open BookMate.Processing.POS
+  type Tokenizer = bool -> string -> seq<string>
+  type Tagger = string -> seq<string*CommonPoS>

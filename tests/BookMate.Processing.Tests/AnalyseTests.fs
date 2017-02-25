@@ -4,8 +4,8 @@ module AnalyseTests =
     open Xunit
     open FsUnit.Xunit
     open BookMate.Processing.POS
-    open BookMate.Processing.Analyse
-    open BookMate.Processing.AnalyseHelper
+    open BookMate.Processing.Analyse.AnalyseDomain
+    open BookMate.Processing.Analyse.AnalyseUtils
 
     [<Fact>]
     let ``Words, part of speech pairs should return correct statistics`` () =
