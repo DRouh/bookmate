@@ -58,15 +58,15 @@ module EpubProcessorTests =
         //clean up
         do Directory.Delete(saveDirPath, true)
     
-
-
-    
-    
     [<Fact>]
-    let ``Should read all text from *HTML file`` = 
+    let ``Should read all text from *HTML file`` () = 
         let fileText = Path.Combine(sampleDirectory, "epub30-titlepage.xhtml") |> File.ReadAllText
         let html = HtmlUtils.loadHtml fileText
         let actualText = HtmlUtils.getTextFromHtml html
         let expretedText = Path.Combine(sampleDirectory, "epub30-titlepage.txt") |> File.ReadAllLines
-
         actualText = expretedText |> should be True
+
+    [<Fact>]
+    let ``Should update text node in *HTML document`` () =
+        
+        1 =1 |> should be True

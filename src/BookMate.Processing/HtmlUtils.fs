@@ -31,3 +31,8 @@ module HtmlUtils =
       html.Save(writer)
       result <- writer.ToString()
       File.WriteAllText(savePath, result)
+
+  let updateTextNode (node : HtmlTextNode) : HtmlTextNode = 
+    let updatedNode = (node.CloneNode true) :?> HtmlTextNode
+    updatedNode.Text <- updatedNode.Text + " {{Hi fuck you}}"
+    updatedNode
