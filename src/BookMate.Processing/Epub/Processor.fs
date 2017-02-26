@@ -3,6 +3,7 @@ namespace BookMate.Processing.Epub
 module Processor =
   open System
   open System.IO
+  open BookMate.Core.Helpers.RegexHelper
   open BookMate.Processing.Epub.Domain
   open BookMate.Processing.Epub.IO
 
@@ -31,6 +32,14 @@ module Processor =
             Location = unpackedBook }
           |> Some
       | _ -> None
+  
+  let applyTranslations (taggedWords: TaggedWord list) (translations: Translation list) (text:string) = 
+    let mutable processedText = text
+    for (Word original, Word translation, pos) in translations do
+      let pattern = @"\b" + original + @"\b"
+      let replacement = original + "{" + translation + "}"
+      processedText <- regexReplace processedText pattern replacement 
+    processedText
 
   let translateText tagWords lookup matcher wordsToTranslate text =
     let taggedWords = tagWords text //todo refactor and pass as an arguments

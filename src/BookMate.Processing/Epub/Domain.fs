@@ -1,6 +1,7 @@
 namespace BookMate.Processing.Epub
 
 module Domain = 
+    open BookMate.Processing.POS
     type Extension = 
         | Epub
         | AnyHtml
@@ -26,3 +27,7 @@ module Domain =
         { Name : string
           Path : FilePath
           Content : string }
+    
+    type Word = Word of string
+    type TaggedWord = string*(CommonPoS list)
+    type Translation = Word*Word*CommonPoS
