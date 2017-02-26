@@ -1,52 +1,52 @@
 namespace BookMate.Processing.Tests
 
-module EpubProcessorTests = 
+module EpubProcessorTests =
   open System
   open System.IO
   open Xunit
   open FsUnit.Xunit
   open BookMate.Processing
+  open BookMate.Processing.POS
   open BookMate.Processing.Epub.Domain
   open BookMate.Processing.Epub.IO
   open BookMate.Processing.Epub.Processor
-    
+
   let sampleDirectory = Path.Combine(Directory.GetCurrentDirectory(), "SampleData")
   let sampleFile = Directory.GetFiles(sampleDirectory, "*.epub").[0]
-  
-  let getSaveDirPath() = 
-      let sampleFileName = Path.GetFileNameWithoutExtension(sampleFile)
-      Path.Combine(sampleDirectory, sprintf "%s_%s" sampleFileName (Guid.NewGuid().ToString()))
-  
+  let getSaveDirPath() =
+    let sampleFileName = Path.GetFileNameWithoutExtension(sampleFile)
+    Path.Combine(sampleDirectory, sprintf "%s_%s" sampleFileName (Guid.NewGuid().ToString()))
+
   let toAnyHtmlFilePath = toFilePath AnyHtml
   let toEpubFilePath = toFilePath Epub
-  
+
   [<Fact>]
-  let ``Read book should contain valid data about all files``() = 
+  let ``Read book should contain valid data about all files``() =
     let saveDirPath = getSaveDirPath()
-    
-    let epubFile = 
+
+    let epubFile =
         sampleFile
         |> toEpubFilePath
         |> Option.get
-    
-    let saveDirectory = 
+
+    let saveDirectory =
         saveDirPath
         |> toPackDirPath
         |> Option.get
-    
+
     let unpackedBook = unpackBook (epubFile) (saveDirectory) |> Option.get
-    let expectedFiles = 
+    let expectedFiles =
         Directory.GetFiles(saveDirPath, "*.*html", System.IO.SearchOption.AllDirectories) |> Seq.toList
     let actualReadBook = readBook unpackedBook |> Option.get
     let actualFileCount = actualReadBook.Files |> List.length
-    let actualFilePaths = actualReadBook.Files |> List.map ((fun f -> f.Path) >> (function 
+    let actualFilePaths = actualReadBook.Files |> List.map ((fun f -> f.Path) >> (function
                                                             | AnyHtmlFilePath efp -> efp))
-    
-    let actualFileContents = 
+
+    let actualFileContents =
         actualReadBook.Files
         |> List.map (fun f -> f.Content)
         |> List.reduce (+)
-    
+
     let actualFileNames = actualReadBook.Files |> List.map (fun f -> f.Name)
     //validate contents of a read book
     actualReadBook.Location = unpackedBook |> should be True
@@ -58,11 +58,42 @@ module EpubProcessorTests =
     //clean up
     do Directory.Delete(saveDirPath, true)
 
-  [<Fact>]
-  let ``Should handle multiple occurences of a word in a sentence`` () = 1 = 1 |> should be True
 
   [<Fact>]
-  let ``Should determine a position of a word to be translated in a sentence`` () = 1 = 1 |> should be True
+  let ``Should handle multiple occurences of a word in a sentence``() = 1 =1 |> should be True
 
   [<Fact>]
-  let ``Should apply appropriate translations to a sentence`` () = 1 = 1 |> should be True
+  let ``Should translate taking POS into account``() =
+    //He/{PRP} gave/{VBD} them/{PRP} some/{DT} water/{NN} as/{IN} they/{PRP} water/{VBP} the/{DT} plants/{NNS} daily/{RB}
+    let text = "He gave them some water as they water the plants daily."
+    let wordsToTranslate = [ "water" ]
+    let matchMock = fun _ _ _ -> "He gave them some water{вода} as they water{поливают} the plants daily."
+
+    let lookupMock =
+        fun _ ->
+            [ ("вода", Noun)
+              ("поливают", Verb) ]
+
+    let tagWordsMock =
+        fun _ ->
+            [ ("He", [ Pronoun ])
+              ("gave", [ Verb ])
+              ("them", [ Pronoun ])
+              ("some", [ Noun; Pronoun; Particle ])
+              ("water", [ Noun ])
+              ("as", [ Preposition; Conjunction ])
+              ("they", [ Pronoun ])
+              ("water", [ Verb ])
+              ("the", [ Noun; Pronoun; Particle ])
+              ("plants", [ Noun ])
+              ("daily", [ Adverb ]) ]
+
+    let actualTranslatedText = translateText tagWordsMock lookupMock matchMock wordsToTranslate text
+    let expectedText = "He gave them some water{вода} as they water{поливают} the plants daily."
+    expectedText = actualTranslatedText |> should be True
+
+  [<Fact>]
+  let ``Should determine a position of a word to be translated in a sentence``() = 1 = 1 |> should be True
+
+  [<Fact>]
+  let ``Should apply appropriate translations to a sentence``() = 1 = 1 |> should be True
