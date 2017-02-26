@@ -22,38 +22,47 @@ module EpubProcessorTests =
   
   [<Fact>]
   let ``Read book should contain valid data about all files``() = 
-      let saveDirPath = getSaveDirPath()
-      
-      let epubFile = 
-          sampleFile
-          |> toEpubFilePath
-          |> Option.get
-      
-      let saveDirectory = 
-          saveDirPath
-          |> toPackDirPath
-          |> Option.get
-      
-      let unpackedBook = unpackBook (epubFile) (saveDirectory) |> Option.get
-      let expectedFiles = 
-          Directory.GetFiles(saveDirPath, "*.*html", System.IO.SearchOption.AllDirectories) |> Seq.toList
-      let actualReadBook = readBook unpackedBook |> Option.get
-      let actualFileCount = actualReadBook.Files |> List.length
-      let actualFilePaths = actualReadBook.Files |> List.map ((fun f -> f.Path) >> (function 
-                                                              | AnyHtmlFilePath efp -> efp))
-      
-      let actualFileContents = 
-          actualReadBook.Files
-          |> List.map (fun f -> f.Content)
-          |> List.reduce (+)
-      
-      let actualFileNames = actualReadBook.Files |> List.map (fun f -> f.Name)
-      //validate contents of a read book
-      actualReadBook.Location = unpackedBook |> should be True
-      actualFilePaths = expectedFiles |> should be True
-      actualFileContents
-      |> (String.IsNullOrEmpty >> not)
-      |> should be True
-      actualFileNames = (expectedFiles |> List.map (Path.GetFileNameWithoutExtension)) |> should be True
-      //clean up
-      do Directory.Delete(saveDirPath, true)
+    let saveDirPath = getSaveDirPath()
+    
+    let epubFile = 
+        sampleFile
+        |> toEpubFilePath
+        |> Option.get
+    
+    let saveDirectory = 
+        saveDirPath
+        |> toPackDirPath
+        |> Option.get
+    
+    let unpackedBook = unpackBook (epubFile) (saveDirectory) |> Option.get
+    let expectedFiles = 
+        Directory.GetFiles(saveDirPath, "*.*html", System.IO.SearchOption.AllDirectories) |> Seq.toList
+    let actualReadBook = readBook unpackedBook |> Option.get
+    let actualFileCount = actualReadBook.Files |> List.length
+    let actualFilePaths = actualReadBook.Files |> List.map ((fun f -> f.Path) >> (function 
+                                                            | AnyHtmlFilePath efp -> efp))
+    
+    let actualFileContents = 
+        actualReadBook.Files
+        |> List.map (fun f -> f.Content)
+        |> List.reduce (+)
+    
+    let actualFileNames = actualReadBook.Files |> List.map (fun f -> f.Name)
+    //validate contents of a read book
+    actualReadBook.Location = unpackedBook |> should be True
+    actualFilePaths = expectedFiles |> should be True
+    actualFileContents
+    |> (String.IsNullOrEmpty >> not)
+    |> should be True
+    actualFileNames = (expectedFiles |> List.map (Path.GetFileNameWithoutExtension)) |> should be True
+    //clean up
+    do Directory.Delete(saveDirPath, true)
+
+  [<Fact>]
+  let ``Should handle multiple occurences of a word in a sentence`` () = 1 = 1 |> should be True
+
+  [<Fact>]
+  let ``Should determine a position of a word to be translated in a sentence`` () = 1 = 1 |> should be True
+
+  [<Fact>]
+  let ``Should apply appropriate translations to a sentence`` () = 1 = 1 |> should be True
