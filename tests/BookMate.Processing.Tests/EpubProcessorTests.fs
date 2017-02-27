@@ -21,6 +21,19 @@ module EpubProcessorTests =
   let toAnyHtmlFilePath = toFilePath AnyHtml
   let toEpubFilePath = toFilePath Epub
 
+  let sampleText = "He gave them some water as they water the plants daily."
+  let sampleTaggedWords = 
+              [ ("He", [ Pronoun ])
+                ("gave", [ Verb ])
+                ("them", [ Pronoun ])
+                ("some", [ Noun; Pronoun; Particle ])
+                ("water", [ Noun ])
+                ("as", [ Preposition; Conjunction ])
+                ("they", [ Pronoun ])
+                ("water", [ Verb ])
+                ("the", [ Noun; Pronoun; Particle ])
+                ("plants", [ Noun ])
+                ("daily", [ Adverb ]) ]
   [<Fact>]
   let ``Read book should contain valid data about all files``() = 
     let saveDirPath = getSaveDirPath()
@@ -61,58 +74,22 @@ module EpubProcessorTests =
 
   [<Fact>]
   let ``Should apply translation to a text``() =
-    let text = "He gave them some water as they water the plants daily."
     let expectedText = "He gave them some water{вода} as they water{вода} the plants daily."
     let wordsToTranslate = [ "water" ]
     let translations = [ (Word "water", Word "вода", Noun) ]
-    let taggedWords = 
-            [ ("He", [ Pronoun ])
-              ("gave", [ Verb ])
-              ("them", [ Pronoun ])
-              ("some", [ Noun; Pronoun; Particle ])
-              ("water", [ Noun ])
-              ("as", [ Preposition; Conjunction ])
-              ("they", [ Pronoun ])
-              ("water", [ Verb ])
-              ("the", [ Noun; Pronoun; Particle ])
-              ("plants", [ Noun ])
-              ("daily", [ Adverb ]) ]
-    let actualText = applyTranslations taggedWords translations text
+    let actualText = applyTranslations sampleTaggedWords translations sampleText
     actualText = expectedText |> should be True
     
-  [<Fact>]
-  let ``Should apply translations function should handle multiple occurences of a word in a sentence``() = 
-    1 = 1 |> should be True
+  // [<Fact>]
+  // let ``Should translate taking POS into account``() = 
+  //   let expectedText = "He gave them some water{вода} as they water{поливать} the plants daily."
+  //   let wordsToTranslate = [ "water" ]
+  //   let translations = [ (Word "He", Word "вода", Noun); (Word "He", Word "поливать", Verb);]
+  //   let actualText = applyTranslations sampleTaggedWords translations sampleText
+  //   actualText = expectedText |> should be True
 
   [<Fact>]
-  let ``Should translate taking POS into account``() = 
-    //He/{PRP} gave/{VBD} them/{PRP} some/{DT} water/{NN} as/{IN} they/{PRP} water/{VBP} the/{DT} plants/{NNS} daily/{RB}
-    let text = "He gave them some water as they water the plants daily."
-    let wordsToTranslate = [ "water" ]
-    let matchMock = fun _ _ _ -> "He gave them some water{вода} as they water{поливают} the plants daily."
-    
-    let lookupMock = 
-        fun _ -> 
-            [ ("вода", Noun)
-              ("поливают", Verb) ]
-    
-    let tagWordsMock = 
-        fun _ -> 
-            [ ("He", [ Pronoun ])
-              ("gave", [ Verb ])
-              ("them", [ Pronoun ])
-              ("some", [ Noun; Pronoun; Particle ])
-              ("water", [ Noun ])
-              ("as", [ Preposition; Conjunction ])
-              ("they", [ Pronoun ])
-              ("water", [ Verb ])
-              ("the", [ Noun; Pronoun; Particle ])
-              ("plants", [ Noun ])
-              ("daily", [ Adverb ]) ]
-    
-    let actualTranslatedText = translateText tagWordsMock lookupMock matchMock wordsToTranslate text
-    let expectedText = "He gave them some water{вода} as they water{поливают} the plants daily."
-    expectedText = actualTranslatedText |> should be True
+  let ``If no exact PoS translation available should use what's available instead``() = 1 = 1 |> should be True
 
   [<Fact>]
   let ``Should determine a position of a word to be translated in a sentence``() = 1 = 1 |> should be True
