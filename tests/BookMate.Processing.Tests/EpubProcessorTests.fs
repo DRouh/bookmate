@@ -89,6 +89,12 @@ module EpubProcessorTests =
   //   actualText = expectedText |> should be True
 
   [<Fact>]
+  let ``Find indexes of exact matches of a substring in the string `` () =
+    let text = "abc DEFG HIgk lmno ABCD ABC qwert abc \r\n \r\nabc"
+    let indexes = indexesOfSubstring "abc" text
+    indexes = [0; 24; 34; 43] |> should be True
+
+  [<Fact>]
   let ``If no exact PoS translation available should use what's available instead``() = 1 = 1 |> should be True
 
   [<Fact>]
