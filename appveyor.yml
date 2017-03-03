@@ -4,3 +4,5 @@ build_script:
 - cmd: build.cmd
 test_script:
 - cmd: test.cmd
+after_test: 
+- pip install codecov
