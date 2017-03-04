@@ -72,27 +72,18 @@ module EpubProcessorTests =
         //clean up
         do Directory.Delete(saveDirPath, true)
     
-    [<Fact>]
-    let ``Should apply translation to a text``() = 
-        let expectedText = "He gave them some water{вода} as they water{вода} the plants daily."
-        let wordsToTranslate = [ "water" ]
-        let translations = [ (Word "water", Word "вода", Noun) ]
-        let actualText = applyTranslations sampleTaggedWords translations sampleText
-        actualText = expectedText |> should be True
-    
     // [<Fact>]
-    // let ``Should translate taking POS into account``() = 
-    //   let expectedText = "He gave them some water{вода} as they water{поливать} the plants daily."
-    //   let wordsToTranslate = [ "water" ]
-    //   let translations = [ (Word "He", Word "вода", Noun); (Word "He", Word "поливать", Verb);]
-    //   let actualText = applyTranslations sampleTaggedWords translations sampleText
-    //   actualText = expectedText |> should be True
+    // let ``Should apply translation to a text``() = 
+    //     let expectedText = "He gave them some water{вода} as they water{вода} the plants daily."
+    //     let wordsToTranslate = [ "water" ]
+    //     let translations = [ (Word "water", Word "вода", Noun) ]
+    //     let actualText = applyTranslations sampleTaggedWords translations sampleText
+    //     actualText = expectedText |> should be True
     
     [<Fact>]
-    let ``If no exact PoS translation available should use what's available instead``() = 1 = 1 |> should be True
-    
-    [<Fact>]
-    let ``Should determine a position of a word to be translated in a sentence``() = 1 = 1 |> should be True
-    
-    [<Fact>]
-    let ``Should apply appropriate translations to a sentence``() = 1 = 1 |> should be True
+    let ``Should translate taking POS into account``() = 
+      let expectedText = "He gave them some water{вода} as they water{поливать} the plants daily."
+      let wordsToTranslate = [ "water" ]
+      let translations = [ (Word "water", Word "вода", Noun); (Word "water", Word "поливать", Verb);]
+      let actualText = applyTranslations sampleTaggedWords translations sampleText
+      actualText = expectedText |> should be True
