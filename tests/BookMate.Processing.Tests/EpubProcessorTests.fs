@@ -63,27 +63,29 @@ module EpubProcessorTests =
         
         let actualFileNames = actualReadBook.Files |> List.map (fun f -> f.Name)
         //validate contents of a read book
-        actualReadBook.Location = unpackedBook |> should be True
-        actualFilePaths = expectedFiles |> should be True
+        actualReadBook.Location  |> should equal unpackedBook
+        actualFilePaths |> should equal expectedFiles
+        
         actualFileContents
         |> (String.IsNullOrEmpty >> not)
         |> should be True
-        actualFileNames = (expectedFiles |> List.map (Path.GetFileNameWithoutExtension)) |> should be True
+
+        actualFileNames |> should equal (expectedFiles |> List.map (Path.GetFileNameWithoutExtension))
         //clean up
         do Directory.Delete(saveDirPath, true)
     
     [<Fact>]
-    let ``Should apply translation to a text``() = 
-        let expectedText = "He gave them some water{вода} as they water{вода} the plants daily."
-        let wordsToTranslate = [ "water" ]
-        let translations = [ (Word "water", Word "вода", Noun) ]
-        let actualText = applyTranslations sampleTaggedWords translations sampleText
-        actualText = expectedText |> should be True
+    let ``Empty translations list should cause to return original text`` () =
+        let actualText = applyTranslations sampleTaggedWords [] sampleText
+        actualText |> should equal sampleText
     
     [<Fact>]
+    let ``Should apply translation to a text``() = 
+        let actualText = applyTranslations sampleTaggedWords [ (Word "water", Word "вода", Noun) ] sampleText
+        actualText |> should equal "He gave them some water{вода} as they water{вода} the plants daily."
+        
+    [<Fact>]
     let ``Should translate taking POS into account``() = 
-      let expectedText = "He gave them some water{вода} as they water{поливать} the plants daily."
-      let wordsToTranslate = [ "water" ]
-      let translations = [ (Word "water", Word "вода", Noun); (Word "water", Word "поливать", Verb);]
-      let actualText = applyTranslations sampleTaggedWords translations sampleText
-      actualText = expectedText |> should be True
+      let actualText = applyTranslations sampleTaggedWords [ (Word "water", Word "вода", Noun); (Word "water", Word "поливать", Verb);] sampleText
+      actualText |> should equal "He gave them some water{вода} as they water{поливать} the plants daily."
+      
