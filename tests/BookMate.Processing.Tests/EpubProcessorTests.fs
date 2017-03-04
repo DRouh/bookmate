@@ -72,13 +72,13 @@ module EpubProcessorTests =
         //clean up
         do Directory.Delete(saveDirPath, true)
     
-    // [<Fact>]
-    // let ``Should apply translation to a text``() = 
-    //     let expectedText = "He gave them some water{вода} as they water{вода} the plants daily."
-    //     let wordsToTranslate = [ "water" ]
-    //     let translations = [ (Word "water", Word "вода", Noun) ]
-    //     let actualText = applyTranslations sampleTaggedWords translations sampleText
-    //     actualText = expectedText |> should be True
+    [<Fact>]
+    let ``Should apply translation to a text``() = 
+        let expectedText = "He gave them some water{вода} as they water{вода} the plants daily."
+        let wordsToTranslate = [ "water" ]
+        let translations = [ (Word "water", Word "вода", Noun) ]
+        let actualText = applyTranslations sampleTaggedWords translations sampleText
+        actualText = expectedText |> should be True
     
     [<Fact>]
     let ``Should translate taking POS into account``() = 

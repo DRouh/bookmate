@@ -7,7 +7,9 @@ module Processor =
 
     open BookMate.Core.Helpers.RegexHelper
     open BookMate.Processing.Epub.Domain
-    open BookMate.Processing.Epub.IO   
+    open BookMate.Processing.Epub.IO 
+    open BookMate.Processing.POS
+    
     let getFileName = Path.GetFileNameWithoutExtension
     let readAllText = File.ReadAllText
     
@@ -47,13 +49,19 @@ module Processor =
           if start < text.Length then yield text.Substring(start) ]
     
     let unwords = List.reduce (+)
-    let (=~) target regex = System.Text.RegularExpressions.Regex.IsMatch(target, regex)
+    let (=~) target regex = System.Text.RegularExpressions.Regex.IsMatch(target, regex, RegexOptions.IgnoreCase)
     let (><) lst value = List.contains value lst
+    let (!*) (xs:'a list) (ys:'a list) = xs |> List.exists (fun x -> List.contains x ys)
+    let translateWord original translation = original + "{" + translation + "}"
     
     let applyTranslations (taggedWords : TaggedWord list) (translations : Translation list) (text : string) = 
         let toExactMatchPattern word = @"\b" + word + @"\b"
-        let translateWord original translation = original + "{" + translation + "}"
-        
+        let distinctTranslations = translations |> List.distinct
+        let exactPosTranslations = 
+            [ for (word, poss) in taggedWords do
+                    for (Word o, Word t, p) in distinctTranslations do
+                        if word =~ o && poss >< p then yield (Word o, Word t, p) ]
+
         let translateFuzzy fuzzyTranslations text = 
             let mutable processedText = text
             for (Word original, Word translation, _) in fuzzyTranslations do
@@ -63,44 +71,43 @@ module Processor =
             processedText
         
         let translateExactPos exactPosTranslations text = 
+            let toString (xs:string list) = xs |> String.concat ","
+            let translationsForPos (translations:(string*CommonPoS) list) (pos:CommonPoS list) = translations |> List.where (fun (_, tag) -> pos >< tag) |> List.map (fst) |> toString
+
             let mutable processedText = text
-            for (Word original, Word translation, pos) in exactPosTranslations do
+            let translationGroupedForWord = 
+                exactPosTranslations
+                |> List.groupBy (fun ((Word original), (Word _), _) -> original)
+                |> List.map 
+                      (fun (word, ts) -> (word, ts |> List.map (fun ((Word _), (Word translation), tags) -> (translation, tags))))
+            
+            for (original, ts) in translationGroupedForWord do
+                let translationTags = ts |> List.map (snd) 
+                let allTranslationsForWord = ts |> List.map (fst) |> toString
+
                 let taggedWordOccurrences = 
                     taggedWords
                     |> List.filter (fun (w, _) -> w =~ original)
-                    |> List.map (fun (_, tags) -> tags)
-                
+                    |> Array.ofList
+                    |> Array.map (fun (_, tags) -> tags)
+
+                let pickTranslations word c = 
+                    if word =~ original then
+                        let wordTags = taggedWordOccurrences.[c - 1]
+                        if wordTags |> !* translationTags then translateWord original (translationsForPos ts wordTags)
+                        else word + "{" + allTranslationsForWord + "}"
+                    else word
+
                 let taggedWordInSentence = 
                     processedText
                     |> words
-                    |> List.map (fun w -> 
-                           (w, 
-                            if w =~ original then 1
-                            else 0))
-                    |> List.scan (fun (_, ac) (w, c) -> 
-                           (w, 
-                            if c <> 0 then ac + c
-                            else ac)) ("", 0)
-                    |> List.map (fun (w, c) -> 
-                           (w, 
-                            if w =~ original then taggedWordOccurrences.[c - 1] >< pos
-                            else false))
-                    |> List.map (function 
-                           | (word, toTranslate) -> 
-                               if toTranslate then translateWord original translation
-                               else word
-                           | _ -> "")
+                    |> List.map (fun w -> (w, if w =~ original then 1 else 0))
+                    |> List.scan (fun (_, ac) (w, c) -> (w, if w =~ original then ac + 1 else ac)) ("", 0)
+                    |> List.map (fun (w, c) -> pickTranslations w c)
                     |> unwords
                 processedText <- taggedWordInSentence
             processedText
-        
-        let distinctTranslations = translations |> List.distinct
-        
-        let exactPosTranslations = 
-            [ for (word, poss) in taggedWords do
-                  for (Word o, Word t, p) in distinctTranslations do
-                      if word =~ o && poss >< p then yield (Word o, Word t, p) ]
-        
+
         let fuzzyTranslations = 
             (Set.difference (Set.ofList distinctTranslations) (Set.ofList exactPosTranslations)) |> List.ofSeq
         text
