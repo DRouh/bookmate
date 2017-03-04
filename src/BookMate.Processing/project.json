@@ -13,6 +13,7 @@
         "Analyse/AnalyseDomain.fs",
         "Analyse/AnalyseUtils.fs",
         "Epub/Domain.fs",
+        "Translation.fs",
         "Epub/IO.fs",
         "Epub/Processor.fs"
       ]

@@ -8,7 +8,8 @@
         "AnalyseTests.fs",
         "EpubIOTests.fs",
         "EpubProcessorTests.fs",
-        "StanfordTaggerTests.fs"
+        "StanfordTaggerTests.fs",
+        "TranslationTest.fs"
       ]
     }
   },

@@ -13,19 +13,7 @@ module EpubProcessorTests =
     let sampleFile = Directory.GetFiles(sampleDirectory, "*.epub").[0]
     let getSaveDirPath() = Path.Combine(sampleDirectory, sprintf "%s_%s"  (Path.GetFileNameWithoutExtension(sampleFile)) (Guid.NewGuid().ToString()))
     let toEpubFilePath = toFilePath Epub
-    let sampleText = "He gave them some water as they water the plants daily."
-    let sampleTaggedWords = 
-        [ ("He", [ Pronoun ])
-          ("gave", [ Verb ])
-          ("them", [ Pronoun ])
-          ("some", [ Noun; Pronoun; Particle ])
-          ("water", [ Noun ])
-          ("as", [ Preposition; Conjunction ])
-          ("they", [ Pronoun ])
-          ("water", [ Verb ])
-          ("the", [ Noun; Pronoun; Particle ])
-          ("plants", [ Noun ])
-          ("daily", [ Adverb ]) ]   
+
     [<Fact>]
     let ``Read book should contain valid data about all files``() = 
         let saveDirPath = getSaveDirPath()
@@ -49,17 +37,4 @@ module EpubProcessorTests =
         //clean up
         do Directory.Delete(saveDirPath, true)
     
-    [<Fact>]
-    let ``Empty translations list should cause to return original text`` () =
-        let actualText = applyTranslations sampleTaggedWords [] sampleText
-        actualText |> should equal sampleText
     
-    [<Fact>]
-    let ``Should apply translation to a text``() = 
-        let actualText = applyTranslations sampleTaggedWords [ (Word "water", Word "вода", Noun) ] sampleText
-        actualText |> should equal "He gave them some water{вода} as they water{вода} the plants daily."
-        
-    [<Fact>]
-    let ``Should translate taking POS into account``() = 
-      let actualText = applyTranslations sampleTaggedWords [ (Word "water", Word "вода", Noun); (Word "water", Word "поливать", Verb);] sampleText
-      actualText |> should equal "He gave them some water{вода} as they water{поливать} the plants daily."
