@@ -41,3 +41,8 @@ module TranslationTest =
     let ``Should translate taking POS into account``() = 
       let actualText = applyTranslations sampleTaggedWords [ (Word "water", Word "вода", Noun); (Word "water", Word "поливать", Verb);] sampleText
       actualText |> should equal "He gave them some water{вода} as they water{поливать} the plants daily."
+
+    [<Fact>]
+    let ``Should translate case-insensitively``() = 
+        let actualText = applyTranslations sampleTaggedWords [ (Word "WATER", Word "вода", Noun); (Word "water", Word "поливать", Verb); ] sampleText
+        actualText |> should equal "He gave them some water{вода} as they water{поливать} the plants daily."
