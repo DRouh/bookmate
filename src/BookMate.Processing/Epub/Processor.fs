@@ -39,23 +39,60 @@ module Processor =
      if words.IsEmpty then List.empty<string*int>
      else words |> List.mapi (fun i x -> (x, i))
 
-  let toExactMatchPattern word =  @"\b" + word + @"\b"
+  let words (text : string) = 
+      [ let mutable start = 0
+        let mutable index = 0
+        let delim = [| ' ' |]
+        index <- text.IndexOfAny(delim, start)
+        while index <> -1 do
+            if index - start > 0 then yield text.Substring(start, index - start)
+            yield text.Substring(index, 1)
+            start <- index + 1
+            index <- text.IndexOfAny(delim, start)
+        if start < text.Length then yield text.Substring(start) ]
 
-  let indexesOfSubstring (word:string) (text:string) = 
-    let pattern = toExactMatchPattern word
-    Regex.Matches(text, pattern, RegexOptions.IgnoreCase) 
-    |> Seq.cast<Match>
-    |> Seq.map (fun m -> m.Index)
-    |> List.ofSeq
+  let unwords = List.reduce (+)
+  let (=~) target regex = System.Text.RegularExpressions.Regex.IsMatch(target, regex)
+  let (><) lst value = List.contains value lst
 
-  let applyTranslations (taggedWords: TaggedWord list) (translations: Translation list) (text:string) = 
-    let mutable processedText = text
-    for (Word original, Word translation, pos) in translations do
-      let pattern = toExactMatchPattern original
-      let replacement = original + "{" + translation + "}"
+  let applyTranslations (taggedWords : TaggedWord list) (translations : Translation list) (text : string) = 
+      let toExactMatchPattern word = @"\b" + word + @"\b"
+      let translateWord x translation = x + "{" + translation + "}"
       
-      processedText <- regexReplace processedText pattern replacement 
-    processedText
+      let translateFuzzy fuzzyTranslations text = 
+          let mutable processedText = text
+          for (Word original, Word translation, _) in fuzzyTranslations do
+              let pattern = toExactMatchPattern original
+              let replacement = translateWord original translation
+              processedText <- regexReplace processedText pattern replacement
+          processedText
+      
+      let translateExactPos exactPosTranslations text = 
+          let mutable processedText = text
+          
+          let translateCond translation (word, isMatch) = 
+              if isMatch then translateWord word translation
+              else word
+          for (Word original, Word translation, pos) in exactPosTranslations do
+              processedText <- processedText
+                              |> words
+                              |> List.map (fun word -> (word, word =~ original))
+                              |> List.map (translateCond translation)
+                              |> unwords
+          processedText
+      
+      let distinctTranslations = translations |> List.distinct
+      
+      let exactPosTranslations = 
+          [ for (word, poss) in taggedWords do
+                for (Word o, Word t, p) in distinctTranslations do
+                    if word =~ o && poss >< p then yield (Word o, Word t, p) ]
+      
+      let fuzzyTranslations = 
+          (Set.difference (Set.ofList distinctTranslations) (Set.ofList exactPosTranslations)) |> List.ofSeq
+      text
+      |> translateFuzzy fuzzyTranslations
+      |> translateExactPos exactPosTranslations
   
   let translateText tagWords lookup matcher wordsToTranslate text =
     let taggedWords = tagWords text //todo refactor and pass as an arguments
