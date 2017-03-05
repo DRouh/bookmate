@@ -6,16 +6,16 @@ module Translation =
   open BookMate.Processing.POS
   open BookMate.Processing.Epub.Domain
   let words (text : string) = 
-      [ let mutable start = 0
-        let mutable index = 0
-        let delim = [| ' ' |]
-        index <- text.IndexOfAny(delim, start)
-        while index <> -1 do
-            if index - start > 0 then yield text.Substring(start, index - start)
-            yield text.Substring(index, 1)
-            start <- index + 1
-            index <- text.IndexOfAny(delim, start)
-        if start < text.Length then yield text.Substring(start) ]
+    [ let mutable start = 0
+      let mutable index = 0
+      let delim = [| ' ' |]
+      index <- text.IndexOfAny(delim, start)
+      while index <> -1 do
+          if index - start > 0 then yield text.Substring(start, index - start)
+          yield text.Substring(index, 1)
+          start <- index + 1
+          index <- text.IndexOfAny(delim, start)
+      if start < text.Length then yield text.Substring(start) ]
 
   let unwords = List.reduce (+)
   let (=~) target regex = System.Text.RegularExpressions.Regex.IsMatch(target, regex, RegexOptions.IgnoreCase)
@@ -44,7 +44,7 @@ module Translation =
       |> List.map (fst)
       |> toString
 
-  let applyWordTranslations text originalWord wordTranslationAndTags taggedWordsInSentence = 
+  let applyWordTranslations taggedWordsInSentence text (originalWord, wordTranslationAndTags) = 
       let tagsForOriginalWord = wordTranslationAndTags |> List.map (snd)
           
       let allTranslationsForWord = 
@@ -76,11 +76,9 @@ module Translation =
 
   let applyTranslations (taggedWords : TaggedWord list) (translations : Translation list) (text : string) = 
       let translationGroupedForWord = toGroupedTranslation translations
-      
-      let mutable processedText = text
-      for (original, translationAndTags) in translationGroupedForWord do
-          processedText <- applyWordTranslations processedText original translationAndTags taggedWords
-      processedText
+      let applyWordTranslations' = taggedWords |> applyWordTranslations
+      translationGroupedForWord 
+      |> List.fold applyWordTranslations' text
     
   let translateText tagWords lookup matcher wordsToTranslate text = 
       let taggedWords = tagWords text //todo refactor and pass as an arguments
