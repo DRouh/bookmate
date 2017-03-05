@@ -18,7 +18,9 @@ module Translation =
         if start < text.Length then yield text.Substring(start) ]
 
   let unwords = List.reduce (+)
-  let (=~) target regex = System.Text.RegularExpressions.Regex.IsMatch(target, regex, RegexOptions.IgnoreCase)
+  let (=~) target regex = 
+      let exact = @"\b" + regex + @"\b"
+      System.Text.RegularExpressions.Regex.IsMatch(target, exact, RegexOptions.IgnoreCase)
   let isIn xs y = List.contains y xs
   let doesIntersectWith xs ys = xs |> List.exists (fun x -> List.contains x ys)
   let toTranslatedForm original translation = original + "{" + translation + "}"
