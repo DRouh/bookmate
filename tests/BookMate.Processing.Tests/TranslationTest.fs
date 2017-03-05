@@ -79,3 +79,12 @@ module TranslationTest =
         actualText 
         |> should equal 
                "He{он} gave{дал} them{им} some{немного} water{вода} as{так как} they{они} water{поливать} the{этот} plants{растения} daily{ежедневно}."
+
+    [<Fact>]
+    let ``Should not exceed max number of translations for a word``() = 
+        let actualText = 
+            applyTranslations sampleTaggedWords [ (Word "water", Word "мочить", Verb)
+                                                  (Word "water", Word "разливать", Verb)
+                                                  (Word "water", Word "поливать", Verb) ] sampleText 2
+        actualText 
+        |> should equal "He gave them some water{мочить,разливать} as they water{мочить,разливать} the plants daily."
