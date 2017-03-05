@@ -30,13 +30,7 @@ module TranslationTest =
         let actualText = applyTranslations sampleTaggedWords [] sampleText
         actualText 
         |> should equal sampleText
-    
-    [<Fact>]
-    let ``Should apply translation to a text``() = 
-        let actualText = applyTranslations sampleTaggedWords [ (Word "water", Word "вода", Noun) ] sampleText
-        actualText 
-        |> should equal "He gave them some water{вода} as they water{вода} the plants daily."
-    
+
     [<Fact>]
     let ``Should translate taking POS into account``() = 
         let actualText = 
