@@ -1,6 +1,7 @@
 namespace BookMate.Processing.Tests
 
-module EpubIOTests = 
+module EpubIOTest
+ = 
     open System
     open System.IO
     open Xunit
@@ -12,8 +13,6 @@ module EpubIOTests =
     open BookMate.Processing.Epub.Domain
     open BookMate.Processing.Epub.IO
     
-    let flip f a b = f b a
-    let unpackBook' = flip unpackBook
     let sampleDirectory = Path.Combine(Directory.GetCurrentDirectory(), "SampleData")
     let toEpubFilePath = toFilePath Epub
 
@@ -21,13 +20,13 @@ module EpubIOTests =
     [<InlineData(null); InlineData(""); InlineData("c:\\q1q1w1"); InlineData("c:\\q1q1w1.gibberish")>]
     let ``Path to nonexistent file is not valid FilePath`` (filePath) = 
         let actual = filePath |> toEpubFilePath
-        actual = None |> should be True
+        None |> should equal actual
     
     [<Fact>]
     let ``Path to existing non-epub file is not valid FilePath``() = 
         let sampleTxtFilePath = Directory.GetFiles(sampleDirectory, "*.txt").[0]
         let actual = sampleTxtFilePath |> toEpubFilePath
-        actual = None |> should be True
+        None |> should equal actual
     
     [<Fact>]
     let ``Unpacked Dir is not yet exisitng dir``() = 
@@ -40,14 +39,15 @@ module EpubIOTests =
     [<InlineData("~/gibberish"); InlineData("../gibberish")>]
     let ``Unpacked Dir should be a creatable path to not yet exisitng dir`` (filePath) = 
         let actual = filePath |> toPackDirPath
-        actual = None |> should be True
+        None |> should equal actual
     
     [<Fact>]
     let ``Unpacked Dir is valid path to not yet exisitng dir``() = 
         let tmpPath = Path.Combine(sampleDirectory, "validdic")
-        let actual = tmpPath |> toPackDirPath
+        let actual = tmpPath |> toPackDirPath |> Option.get 
         let expected = PackDirPath tmpPath
-        actual.Value = expected |> should be True
+        expected |> should equal actual
+        
     
     [<Fact>]
     let ``Unpacking valid epub file should result in path to original file and to directory``() = 
@@ -67,7 +67,7 @@ module EpubIOTests =
                        (saveDirPath |> toPackDirPath |> Option.get)
      
         actual.IsSome |> should be True
-        expected = actual.Value |> should be True
+        expected |> should equal actual.Value
 
         Directory.Exists(saveDirPath) |> should be True
         Directory.GetFiles(saveDirPath) |> Seq.isEmpty |> should be False

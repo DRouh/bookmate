@@ -1,6 +1,6 @@
 namespace BookMate.Processing.Tests
 
-module AnalyseTests = 
+module AnalyseTest = 
     open Xunit
     open FsUnit.Xunit
     open BookMate.Processing.POS
