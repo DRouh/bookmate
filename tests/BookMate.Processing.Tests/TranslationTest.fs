@@ -9,10 +9,6 @@ module TranslationTest =
     open BookMate.Processing.Epub.Domain
     open BookMate.Processing.Epub.IO
     open BookMate.Processing.Translation
-    let sampleDirectory = Path.Combine(Directory.GetCurrentDirectory(), "SampleData")
-    let sampleFile = Directory.GetFiles(sampleDirectory, "*.epub").[0]
-    let getSaveDirPath() = Path.Combine(sampleDirectory, sprintf "%s_%s"  (Path.GetFileNameWithoutExtension(sampleFile)) (Guid.NewGuid().ToString()))
-    let toEpubFilePath = toFilePath Epub
     let sampleText = "He gave them some water as they water the plants daily."
     let sampleTaggedWords = 
         [ ("He", [ Pronoun ])
