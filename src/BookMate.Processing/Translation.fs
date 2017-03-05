@@ -4,7 +4,7 @@ module Translation =
   open System.Text.RegularExpressions
   open BookMate.Core.Helpers.RegexHelper
   open BookMate.Processing.POS
-    open BookMate.Processing.Epub.Domain
+  open BookMate.Processing.Epub.Domain
   let words (text : string) = 
       [ let mutable start = 0
         let mutable index = 0
@@ -40,10 +40,11 @@ module Translation =
           |> List.map mapOriginalToAllTranslations
       translationGroupedForWord
 
-  let forTagTranslations wordTranslationAndTags wordTags = 
+  let forTagTranslations wordTranslationAndTags wordTags maxNumOfTranslationsPerWord = 
       wordTranslationAndTags
       |> List.where (fun (_, tag) -> tag |> isIn wordTags)
       |> List.map (fst)
+      |> Seq.truncate maxNumOfTranslationsPerWord
       |> toString
 
   let pickTranslationsForPos originalWord originalWordTags allWordTranslations forTagTranslations wordTags = 
@@ -58,20 +59,21 @@ module Translation =
       |> Array.filter (fun (currentWord, _) -> currentWord =~ word)
       |> Array.map (fun (_, tags) -> tags)
 
-  let toTranslationsList wordTranslationAndTags = 
+  let toTranslationsList wordTranslationAndTags maxNumOfTranslationsPerWord = 
       wordTranslationAndTags
       |> List.map (fst)
+      |> Seq.truncate maxNumOfTranslationsPerWord
       |> toString
 
-  let applyWordTranslations taggedWordsInSentence text (originalWord, wordTranslationAndTags) = 
+  let applyWordTranslations maxNumOfTranslationsPerWord taggedWordsInSentence text (originalWord, wordTranslationAndTags) = 
       let tagsForOriginalWord = wordTranslationAndTags |> List.map (snd)
-      let allTranslationsForWord = wordTranslationAndTags |> toTranslationsList
-      let taggedWordOccurrences = originalWord |> toWordTaggedOccurrences taggedWordsInSentence
+      let allTranslationsForWord = toTranslationsList wordTranslationAndTags maxNumOfTranslationsPerWord
+      let taggedWordOccurrences = toWordTaggedOccurrences taggedWordsInSentence originalWord 
       
       let pickTranslations (currentWord, count) = 
           if currentWord =~ originalWord then 
               let wordTags = taggedWordOccurrences.[count - 1]
-              let forTagTranslations = forTagTranslations wordTranslationAndTags wordTags
+              let forTagTranslations = forTagTranslations wordTranslationAndTags wordTags maxNumOfTranslationsPerWord
               wordTags |> pickTranslationsForPos currentWord tagsForOriginalWord allTranslationsForWord forTagTranslations
           else currentWord
       
@@ -89,15 +91,15 @@ module Translation =
       |> words
       |> applyTranslations
       |> unwords
-
-  let applyTranslations taggedWords translations text = 
-      let applyWordTranslations' = taggedWords |> applyWordTranslations
+    
+  let applyTranslations taggedWords translations text maxNumOfTranslationsPerWord = 
+      let applyWordTranslations' = taggedWords |> applyWordTranslations maxNumOfTranslationsPerWord 
       translations
       |> toGroupedTranslation
-      |> List.fold applyWordTranslations' text
+      |> List.fold applyWordTranslations' text  
       
   let translateText tagWords lookup matcher wordsToTranslate text = 
       let taggedWords = tagWords text //todo refactor and pass as an arguments
       let translations = lookup text //todo refactor and pass as an arguments
-      let translatedText = applyTranslations taggedWords translations text //todo refactor and pass as an arguments
+      let translatedText = applyTranslations taggedWords translations text 3 //todo refactor and pass as an arguments
       translatedText
