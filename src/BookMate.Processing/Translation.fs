@@ -8,7 +8,7 @@ module Translation =
   let words (text : string) = 
       [ let mutable start = 0
         let mutable index = 0
-        let delim = [| ' ' |]
+        let delim = [| ' '; '.'; '!'; '?' |]
         index <- text.IndexOfAny(delim, start)
         while index <> -1 do
             if index - start > 0 then yield text.Substring(start, index - start)
