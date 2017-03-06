@@ -11,7 +11,7 @@ module Processor =
     let getFileName = Path.GetFileNameWithoutExtension
     let readAllText = File.ReadAllText
     
-    let toEpubReadFile (file : FilePath) = 
+    let toFileInEpub (file : FilePath) = 
         let (AnyHtmlFilePath fp) = file
         let fileName = getFileName fp
         let fileContent = readAllText fp
@@ -28,8 +28,11 @@ module Processor =
                 Directory.GetFiles(dirPath, "*.*html", System.IO.SearchOption.AllDirectories)
                 |> Seq.toList
                 |> List.choose toAnyHtml
-                |> List.map toEpubReadFile
+                |> List.map toFileInEpub
             { Files = files
-              Location = unpackedBook }
+              Location = unpackedBook } : BookToProcess
             |> Some
         | _ -> None
+
+    let processFileInEpub (rawFile: FileInEpub) : ProcessedFileInEpub = raise (NotImplementedException "Not ready")
+    let processEpubBook (rawBook: BookToProcess) : ProcessedBook = raise (NotImplementedException "Not ready")
