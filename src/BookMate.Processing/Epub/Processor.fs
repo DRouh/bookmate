@@ -34,5 +34,9 @@ module Processor =
             |> Some
         | _ -> None
 
-    let processFileInEpub (rawFile: FileInEpub) : ProcessedFileInEpub = raise (NotImplementedException "Not ready")
-    let processEpubBook (rawBook: BookToProcess) : ProcessedBook = raise (NotImplementedException "Not ready")
+    let processFileInEpub (rawFile: FileInEpub) : ProcessedFileInEpub = rawFile
+    
+    let processEpubBook (rawBook: BookToProcess) : ProcessedBook=
+        { Files = rawBook.Files }
+
+    let saveEpubBook (processedBook: ProcessedBook) (savePath:SaveResultPath)=  raise (NotImplementedException "Not ready")

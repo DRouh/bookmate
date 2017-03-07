@@ -31,8 +31,7 @@ module Domain =
           Location : UnpackedPath }
 
     type ProcessedBook = 
-        { Files : List<ProcessedFileInEpub>
-          Location : SaveResultPath }
+        { Files : List<ProcessedFileInEpub> }
 
     type Word = Word of string
     type TaggedWord = string*(CommonPoS list)
