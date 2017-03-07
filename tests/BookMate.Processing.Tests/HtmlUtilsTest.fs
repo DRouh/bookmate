@@ -16,8 +16,8 @@ module HtmlUtilsTest =
       let fileText = sampleHtmlDoc |> File.ReadAllText
       let html = HtmlUtils.loadHtml fileText
       let actualText = HtmlUtils.getTextFromHtml html
-      let expretedText = sampleTxtDoc |> File.ReadAllLines
-      actualText = expretedText |> should be True
+      let expectedText = sampleTxtDoc |> File.ReadAllLines
+      actualText = expectedText |> should be True
   
   [<Fact>]
   let ``Cloned *HTML document should be exactly the same``() = 
