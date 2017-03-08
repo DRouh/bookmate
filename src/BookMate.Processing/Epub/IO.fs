@@ -14,12 +14,12 @@ module IO =
         
         let notContainInvalidChars = 
             let invalidPatter = Path.GetInvalidPathChars() |> string
-            let invalidCharRegex = new Regex("[" + Regex.Escape(invalidPatter) + "]")
+            let invalidCharRegex = Regex("[" + Regex.Escape(invalidPatter) + "]")
             let notContainInvalidChars = invalidCharRegex.IsMatch >> not
             notContainInvalidChars
         
         let validPatternPath = 
-            let validPathRegex = new Regex("^([a-zA-Z]:)?(\\\\[^<>:\"/\\\\|?*]+)+\\\\?$")
+            let validPathRegex = Regex("^([a-zA-Z]:)?(\\\\[^<>:\"/\\\\|?*]+)+\\\\?$")
             validPathRegex.IsMatch
         
         let isValidPath path = 
@@ -45,7 +45,7 @@ module IO =
         | (AnyHtml, fp) when isMatch "^.*\.(html|xhtml)$" (fp.ToLower()) -> Some IsAnyHtml
         | _ -> None
     
-    let toFilePath (fileExt : Extension) (filePath : string) : FilePath option = 
+    let toFilePath (fileExt : FileExtension) (filePath : string) : FilePath option = 
         match (fileExt, filePath) with
         | _ when filePath |> (System.IO.File.Exists >> not) -> None
         | IsEpub -> EpubFilePath filePath |> Some
@@ -54,7 +54,7 @@ module IO =
     
     let getFileName = Path.GetFileNameWithoutExtension
     
-    let unpackBook (bookPath : FilePath) (savePath : PackDirPath) : UnpackedPath option = 
+    let unpackBook (bookPath : FilePath) (savePath : PackDirPath) : BookLocation option = 
         match (bookPath, savePath) with
         | (EpubFilePath fp, PackDirPath pdp) -> 
             createFolder pdp |> ignore
@@ -65,5 +65,5 @@ module IO =
             do File.SetAttributes(zipFileName, FileAttributes.Normal)
             do unzipFile zipFileName pdp
             do File.Delete zipFileName
-            UnpackedPath(bookPath, UnpackedDirPath pdp) |> Some
+            (bookPath, UnpackedBookPath pdp) |> Some
         | _ -> None

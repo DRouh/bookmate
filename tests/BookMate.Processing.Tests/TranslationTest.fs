@@ -34,48 +34,48 @@ module TranslationTest =
     [<Fact>]
     let ``Should translate taking POS into account``() = 
         let actualText = 
-            applyTranslations sampleTaggedWords [ (Word "water", Word "вода", Noun)
-                                                  (Word "water", Word "поливать", Verb) ] sampleText 1
+            applyTranslations sampleTaggedWords [ ("water", "вода", Noun)
+                                                  ("water", "поливать", Verb) ] sampleText 1
         actualText 
         |> should equal "He gave them some water{вода} as they water{поливать} the plants daily."
     
     [<Fact>]
     let ``Should translate case-insensitively``() = 
-        let actualText = applyTranslations sampleTaggedWords [ (Word "WATER", Word "вода", Noun) ] sampleText 1
+        let actualText = applyTranslations sampleTaggedWords [ ("WATER", "вода", Noun) ] sampleText 1
         actualText 
         |> should equal "He gave them some water{вода} as they water{вода} the plants daily."
     
     [<Fact>]
     let ``Should translate using all available translations for POS``() = 
         let actualText = 
-            applyTranslations sampleTaggedWords [ (Word "water", Word "вода", Noun)
-                                                  (Word "water", Word "мочить", Verb)
-                                                  (Word "water", Word "поливать", Verb) ] sampleText 2
+            applyTranslations sampleTaggedWords [ ("water", "вода", Noun)
+                                                  ("water", "мочить", Verb)
+                                                  ("water", "поливать", Verb) ] sampleText 2
         actualText 
         |> should equal "He gave them some water{вода} as they water{мочить,поливать} the plants daily."
     
     [<Fact>]
     let ``Should translate using all available translations if no translation for exact Pos available``() = 
         let actualText = 
-            applyTranslations sampleTaggedWords [ (Word "water", Word "мочить", Verb)
-                                                  (Word "water", Word "поливать", Verb) ] sampleText 2
+            applyTranslations sampleTaggedWords [ ("water", "мочить", Verb)
+                                                  ("water", "поливать", Verb) ] sampleText 2
         actualText 
         |> should equal "He gave them some water{мочить,поливать} as they water{мочить,поливать} the plants daily."
     
     [<Fact>]
     let ``Should apply correct translations``() = 
         let actualText = 
-            applyTranslations sampleTaggedWords [ (Word "He", Word "он", Pronoun)
-                                                  (Word "gave", Word "дал", Verb)
-                                                  (Word "them", Word "им", Pronoun)
-                                                  (Word "some", Word "немного", Noun)
-                                                  (Word "water", Word "вода", Noun)
-                                                  (Word "as", Word "так как", Preposition)
-                                                  (Word "they", Word "они", Pronoun)
-                                                  (Word "water", Word "поливать", Verb)
-                                                  (Word "the", Word "этот", Pronoun)
-                                                  (Word "plants", Word "растения", Noun)
-                                                  (Word "daily", Word "ежедневно", Adverb) ] sampleText 1
+            applyTranslations sampleTaggedWords [ ("He", "он", Pronoun)
+                                                  ("gave", "дал", Verb)
+                                                  ("them", "им", Pronoun)
+                                                  ("some", "немного", Noun)
+                                                  ("water", "вода", Noun)
+                                                  ("as", "так как", Preposition)
+                                                  ("they", "они", Pronoun)
+                                                  ("water", "поливать", Verb)
+                                                  ("the", "этот", Pronoun)
+                                                  ("plants", "растения", Noun)
+                                                  ("daily", "ежедневно", Adverb) ] sampleText 1
         actualText 
         |> should equal 
                "He{он} gave{дал} them{им} some{немного} water{вода} as{так как} they{они} water{поливать} the{этот} plants{растения} daily{ежедневно}."
@@ -83,8 +83,8 @@ module TranslationTest =
     [<Fact>]
     let ``Should not exceed max number of translations for a word``() = 
         let actualText = 
-            applyTranslations sampleTaggedWords [ (Word "water", Word "мочить", Verb)
-                                                  (Word "water", Word "разливать", Verb)
-                                                  (Word "water", Word "поливать", Verb) ] sampleText 2
+            applyTranslations sampleTaggedWords [ ("water", "мочить", Verb)
+                                                  ("water", "разливать", Verb)
+                                                  ("water", "поливать", Verb) ] sampleText 2
         actualText 
         |> should equal "He gave them some water{мочить,разливать} as they water{мочить,разливать} the plants daily."

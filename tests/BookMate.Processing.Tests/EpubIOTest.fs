@@ -59,8 +59,7 @@ module EpubIOTest
         let expected = 
             ((sampleFile
               |> toEpubFilePath
-              |> Option.get), UnpackedDirPath saveDirPath)
-            |> UnpackedPath
+              |> Option.get), UnpackedBookPath saveDirPath)
         
         let actual = 
             unpackBook (sampleFile |> toEpubFilePath |> Option.get) 

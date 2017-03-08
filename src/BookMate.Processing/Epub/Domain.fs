@@ -2,7 +2,7 @@ namespace BookMate.Processing.Epub
 
 module Domain = 
     open BookMate.Processing.POS
-    type Extension = 
+    type FileExtension = 
         | Epub
         | AnyHtml
     
@@ -10,29 +10,27 @@ module Domain =
         | EpubFilePath of string
         | AnyHtmlFilePath of string
     
-    type UnpackedDirPath = UnpackedDirPath of string
+    type UnpackedBookPath = UnpackedBookPath of string
     
     type PackDirPath = PackDirPath of string
     
-    type UnpackedPath = UnpackedPath of FilePath * UnpackedDirPath
+    type BookLocation = FilePath * UnpackedBookPath
     
     type SaveResultPath = SaveResultPath of string
 
-    type FileInEpub = 
+    type BookFile = 
         { Name : string
           Path : FilePath
           Content : string }
     
-    type RawFileInEpub = FileInEpub
-    type ProcessedFileInEpub = FileInEpub
+    type OriginalFileInBook = BookFile
+    type ProcessedFileInBook = BookFile
 
-    type BookToProcess = 
-        { Files : List<RawFileInEpub>
-          Location : UnpackedPath }
+    type BookFiles<'a> = List<'a>
 
-    type ProcessedBook = 
-        { Files : List<ProcessedFileInEpub> }
+    type OriginalBook = BookFiles<OriginalFileInBook> * BookLocation
+    type ProcessedBook = BookFiles<ProcessedFileInBook>
 
-    type Word = Word of string
-    type TaggedWord = string*(CommonPoS list)
-    type Translation = Word*Word*CommonPoS
+    type Word = string
+    type TaggedWord = Word * (CommonPoS list)
+    type Translation = Word * Word * CommonPoS

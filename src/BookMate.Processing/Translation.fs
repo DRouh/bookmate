@@ -28,15 +28,15 @@ module Translation =
 
   let toGroupedTranslation translations = 
       let normalizeTranslation = function 
-          | (Word original, Word translation, tags) -> (Word(original.ToLower()), Word(translation.ToLower()), tags)
+          | (original:Word, translation:Word, tags) -> ((original.ToLower()), (translation.ToLower()), tags)
       let mapOriginalToAllTranslations (word, ts) = 
-          (word, ts |> List.map (fun ((Word _), (Word translation), tags) -> (translation, tags)))
+          (word, ts |> List.map (fun (_, translation, tags) -> (translation, tags)))
       
       let translationGroupedForWord = 
           translations
           |> List.map normalizeTranslation
           |> List.distinct
-          |> List.groupBy (fun ((Word original), (Word _), _) -> original)
+          |> List.groupBy (fun (original, _, _) -> original)
           |> List.map mapOriginalToAllTranslations
       translationGroupedForWord
 

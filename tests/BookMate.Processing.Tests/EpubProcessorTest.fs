@@ -44,20 +44,20 @@ module EpubProcessorTest =
     let unpackedBook = unpackBook (filePath) (packDirpath) |> Option.get
     let expectedFiles = 
         Directory.GetFiles(saveDirPath, "*.*html", System.IO.SearchOption.AllDirectories) |> Seq.toList
-    let actualReadBook = readBook unpackedBook |> Option.get
+    let (actualFiles, actualLocation) = readBook unpackedBook
     //clean up
     do cleanUp saveDirPath
-    let actualFileCount = actualReadBook.Files |> List.length
-    let actualFilePaths = actualReadBook.Files |> List.map ((fun f -> f.Path) >> (fun (AnyHtmlFilePath efp) -> efp))
+    let actualFileCount = actualFiles |> List.length
+    let actualFilePaths = actualFiles |> List.map ((fun f -> f.Path) >> (fun (AnyHtmlFilePath efp) -> efp))
     //validate contents of a read book
-    actualReadBook.Location |> should equal unpackedBook
+    actualLocation |> should equal unpackedBook
     actualFilePaths |> should equal expectedFiles
-    actualReadBook.Files
+    actualFiles
     |> List.map (fun f -> f.Content)
     |> List.reduce (+)
     |> (String.IsNullOrEmpty >> not)
     |> should be True
-    actualReadBook.Files
+    actualFiles
     |> List.map (fun f -> f.Name)
     |> should equal (expectedFiles |> List.map (Path.GetFileNameWithoutExtension))
   
@@ -65,10 +65,10 @@ module EpubProcessorTest =
   let ``Processed book should have the same number of files``() = 
     let (saveDirPath, filePath, packDirpath) = getPaths()
     let unpackedBook = unpackBook filePath packDirpath |> Option.get
-    let readBook = readBook unpackedBook |> Option.get
+    let (readFiles, readLocation) = readBook unpackedBook
     do cleanUp saveDirPath
-    let processed = processEpubBook readBook
-    processed.Files.Length |> should equal readBook.Files.Length
+    let processedFiles = processEpubBook (readFiles, readLocation)
+    processedFiles.Length |> should equal readFiles.Length
   
   [<Fact>]
   let ``Processed file should have the original name and path``() = 
@@ -94,9 +94,9 @@ module EpubProcessorTest =
         |> List.ofArray
     
     let exampleTranslations = 
-        [ (Word "documents", Word "документы", Noun)
-          (Word "reproduced", Word "воспроизведен", Verb)
-          (Word "work", Word "работа", Noun) ]
+        [ ("documents", "документы", Noun)
+          ("reproduced", "воспроизведен", Verb)
+          ("work", "работа", Noun) ]
     
     let rawFile = 
         sampleHtmlDoc

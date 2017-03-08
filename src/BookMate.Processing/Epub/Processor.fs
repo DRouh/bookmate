@@ -23,20 +23,16 @@ module Processor =
     
     let toAnyHtml = toFilePath AnyHtml
     
-    let readBook (unpackedBook : UnpackedPath) : BookToProcess option = 
-        match unpackedBook with
-        | UnpackedPath(EpubFilePath filePath, UnpackedDirPath dirPath) -> 
-            let files = 
-                Directory.GetFiles(dirPath, "*.*html", System.IO.SearchOption.AllDirectories)
-                |> Seq.toList
-                |> List.choose toAnyHtml
-                |> List.map toFileInEpub
-            { Files = files
-              Location = unpackedBook } : BookToProcess
-            |> Some
-        | _ -> None
+    let readBook (unpackedBook : BookLocation) : OriginalBook = 
+        let (EpubFilePath filePath, UnpackedBookPath dirPath) = unpackedBook
+        let files = 
+            Directory.GetFiles(dirPath, "*.*html", System.IO.SearchOption.AllDirectories)
+            |> Seq.toList
+            |> List.choose toAnyHtml
+            |> List.map toFileInEpub
+        (files, unpackedBook)
 
-    let processFileInEpub (rawFile: FileInEpub) taggedWords translations : ProcessedFileInEpub = 
+    let processFileInEpub (rawFile: BookFile) taggedWords translations : ProcessedFileInBook = 
       let htmlDoc = loadHtml rawFile.Content
       let applyTranslations' =  applyTranslations taggedWords translations 
       
@@ -46,7 +42,8 @@ module Processor =
       let updatedContent = htmlToText processedHtml
       { Name = rawFile.Name; Path = rawFile.Path; Content = updatedContent } 
     
-    let processEpubBook (rawBook: BookToProcess) : ProcessedBook=
-        { Files = rawBook.Files }
+    let processEpubBook (rawBook: OriginalBook) : ProcessedBook =
+        let (files, location) = rawBook
+        files
 
-    let saveEpubBook (processedBook: ProcessedBook) (savePath:SaveResultPath)=  raise (NotImplementedException "Not ready")
+    let saveEpubBook (processedBook: ProcessedBook) (savePath:SaveResultPath )= raise (NotImplementedException "Not ready")
