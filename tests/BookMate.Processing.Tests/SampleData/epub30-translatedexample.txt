@@ -4,6 +4,6 @@
 		<img src="../img/idpflogo_web_125.jpg" alt="IDPF Logo"/>
 	</div>
         <h1 class="titlepage">EPUB 3.0 Specification</h1>        
-        <p><em>The documents canonically located at <a href="http://idpf.org/epub/30">http://idpf.org/epub/30</a> reproduced in EPUB 3 format</em></p>        
-        <div class="legalnotice"><p>All rights reserved. This work is protected under Title 17 of the United States Code. Reproduction and dissemination of this work with changes is prohibited except with the written permission of the <a href="http://www.idpf.org">International Digital Publishing Forum (IDPF)</a>. </p><p>EPUB is a registered trademark of the International Digital Publishing Forum.</p></div>        
+        <p><em>The documents{документы} canonically located at <a href="http://idpf.org/epub/30">http://idpf.org/epub/30</a> reproduced{воспроизведен} in EPUB 3 format</em></p>        
+        <div class="legalnotice"><p>All rights reserved. This work{работа} is protected under Title 17 of the United States Code. Reproduction and dissemination of this work with changes is prohibited except with the written permission of the <a href="http://www.idpf.org">International Digital Publishing Forum (IDPF)</a>. </p><p>EPUB is a registered trademark of the International Digital Publishing Forum.</p></div>        
     </body></html>
