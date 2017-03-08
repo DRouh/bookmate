@@ -45,5 +45,3 @@ module Processor =
     let processEpubBook (rawBook: OriginalBook) : ProcessedBook =
         let (files, location) = rawBook
         files
-
-    let saveEpubBook (processedBook: ProcessedBook) (savePath:SaveResultPath )= raise (NotImplementedException "Not ready")

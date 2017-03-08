@@ -8,7 +8,7 @@ module IO =
     open BookMate.Core.Helpers.IOHelper
     open BookMate.Processing.Epub.Domain
     
-    let toPackDirPath (dirPath : string) = 
+    let toExtractTargetPath (dirPath : string) = 
         let removeDoubleSlash (p : string) = p.Replace("\\", @"\")
         let isNotRelative = Path.IsPathRooted
         
@@ -29,7 +29,7 @@ module IO =
         match dirPath with
         | null | "" -> None
         | dp when isValidPath dirPath -> 
-            if not (System.IO.Directory.Exists dirPath) then Some(PackDirPath dirPath)
+            if not (System.IO.Directory.Exists dirPath) then Some(ExtractTargetPath dirPath)
             else None
         | _ -> None
     
@@ -54,9 +54,9 @@ module IO =
     
     let getFileName = Path.GetFileNameWithoutExtension
     
-    let unpackBook (bookPath : FilePath) (savePath : PackDirPath) : BookLocation option = 
+    let extractBook (bookPath : FilePath) (savePath : ExtractTargetPath) : BookLocation option = 
         match (bookPath, savePath) with
-        | (EpubFilePath fp, PackDirPath pdp) -> 
+        | (EpubFilePath fp, ExtractTargetPath pdp) -> 
             createFolder pdp |> ignore
             let fileName = getFileName fp
             let zipFileName = pdp +/ (fileName + ".zip")

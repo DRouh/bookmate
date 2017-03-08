@@ -30,7 +30,7 @@ module EpubIOTest
     
     [<Fact>]
     let ``Unpacked Dir is not yet exisitng dir``() = 
-        let actual = sampleDirectory |> toPackDirPath
+        let actual = sampleDirectory |> toExtractTargetPath
         actual = None |> should be True
     
     [<Theory>]
@@ -38,14 +38,14 @@ module EpubIOTest
     [<InlineData("c:/gibberish"); InlineData("/gibberish")>]
     [<InlineData("~/gibberish"); InlineData("../gibberish")>]
     let ``Unpacked Dir should be a creatable path to not yet exisitng dir`` (filePath) = 
-        let actual = filePath |> toPackDirPath
+        let actual = filePath |> toExtractTargetPath
         None |> should equal actual
     
     [<Fact>]
     let ``Unpacked Dir is valid path to not yet exisitng dir``() = 
         let tmpPath = Path.Combine(sampleDirectory, "validdic")
-        let actual = tmpPath |> toPackDirPath |> Option.get 
-        let expected = PackDirPath tmpPath
+        let actual = tmpPath |> toExtractTargetPath |> Option.get 
+        let expected = ExtractTargetPath tmpPath
         expected |> should equal actual
         
     
@@ -54,20 +54,20 @@ module EpubIOTest
         let sampleFile = Directory.GetFiles(sampleDirectory, "*.epub").[0]
         let fileName = Path.GetFileNameWithoutExtension(sampleFile)
         let saveDirName = sprintf "%s_%s" fileName (Guid.NewGuid().ToString())
-        let saveDirPath = Path.Combine(sampleDirectory, saveDirName)
+        let extractTargetPath = Path.Combine(sampleDirectory, saveDirName)
         
         let expected = 
             ((sampleFile
               |> toEpubFilePath
-              |> Option.get), UnpackedBookPath saveDirPath)
+              |> Option.get), UnpackedBookPath extractTargetPath)
         
         let actual = 
-            unpackBook (sampleFile |> toEpubFilePath |> Option.get) 
-                       (saveDirPath |> toPackDirPath |> Option.get)
+            extractBook (sampleFile |> toEpubFilePath |> Option.get) 
+                       (extractTargetPath |> toExtractTargetPath |> Option.get)
      
         actual.IsSome |> should be True
         expected |> should equal actual.Value
 
-        Directory.Exists(saveDirPath) |> should be True
-        Directory.GetFiles(saveDirPath) |> Seq.isEmpty |> should be False
-        do Directory.Delete(saveDirPath, true)
+        Directory.Exists(extractTargetPath) |> should be True
+        Directory.GetFiles(extractTargetPath) |> Seq.isEmpty |> should be False
+        do Directory.Delete(extractTargetPath, true)

@@ -13,7 +13,7 @@ module EpubProcessorTest =
     
   let sampleDirectory = Path.Combine(Directory.GetCurrentDirectory(), "SampleData")
   let sampleFile = Directory.GetFiles(sampleDirectory, "*.epub").[0]
-  let getSaveDirPath() = 
+  let getExtractTargetPath() = 
       Path.Combine
           (sampleDirectory, sprintf "%s_%s" (Path.GetFileNameWithoutExtension(sampleFile)) (Guid.NewGuid().ToString()))
   let toEpubFilePath = toFilePath Epub
@@ -22,31 +22,31 @@ module EpubProcessorTest =
   let sampleTaggedWords = Path.Combine(sampleDirectory, "epub30-tagged.json")
   
   let getPaths() = 
-    let saveDirPath = getSaveDirPath()
+    let path = getExtractTargetPath()
     
     let filePath = 
         sampleFile
         |> toEpubFilePath
         |> Option.get
     
-    let packDirpath = 
-        saveDirPath
-        |> toPackDirPath
+    let extractTargetPath = 
+        path
+        |> toExtractTargetPath
         |> Option.get
     
-    (saveDirPath, filePath, packDirpath)
+    (path, filePath, extractTargetPath)
   
-  let cleanUp saveDirPath = do Directory.Delete(saveDirPath, true)
+  let cleanUp extractTargetPath = do Directory.Delete(extractTargetPath, true)
     
   [<Fact>]
   let ``Read book should contain valid data about all files``() = 
-    let (saveDirPath, filePath, packDirpath) = getPaths()
-    let unpackedBook = unpackBook (filePath) (packDirpath) |> Option.get
+    let (path, filePath, extractTargetPath) = getPaths()
+    let unpackedBook = extractBook (filePath) (extractTargetPath) |> Option.get
     let expectedFiles = 
-        Directory.GetFiles(saveDirPath, "*.*html", System.IO.SearchOption.AllDirectories) |> Seq.toList
+        Directory.GetFiles(path, "*.*html", System.IO.SearchOption.AllDirectories) |> Seq.toList
     let (actualFiles, actualLocation) = readBook unpackedBook
     //clean up
-    do cleanUp saveDirPath
+    do cleanUp path
     let actualFileCount = actualFiles |> List.length
     let actualFilePaths = actualFiles |> List.map ((fun f -> f.Path) >> (fun (AnyHtmlFilePath efp) -> efp))
     //validate contents of a read book
@@ -63,10 +63,10 @@ module EpubProcessorTest =
   
   [<Fact>]
   let ``Processed book should have the same number of files``() = 
-    let (saveDirPath, filePath, packDirpath) = getPaths()
-    let unpackedBook = unpackBook filePath packDirpath |> Option.get
+    let (path, filePath, extractTargetPath) = getPaths()
+    let unpackedBook = extractBook filePath extractTargetPath |> Option.get
     let (readFiles, readLocation) = readBook unpackedBook
-    do cleanUp saveDirPath
+    do cleanUp path
     let processedFiles = processEpubBook (readFiles, readLocation)
     processedFiles.Length |> should equal readFiles.Length
   
