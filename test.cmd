@@ -18,3 +18,5 @@ cd BookMate.Processing.Tests
 call dotnet test 
 @echo off
 cd..
+
+cd..
