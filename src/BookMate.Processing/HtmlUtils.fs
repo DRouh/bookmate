@@ -9,7 +9,7 @@ module HtmlUtils =
   let loadHtml (fileText : string) = 
       let html = new HtmlAgilityPack.HtmlDocument()
       html.OptionWriteEmptyNodes <- true
-      html.OptionOutputAsXml <- true
+      html.OptionOutputAsXml <- false
       html.LoadHtml(fileText)
       html
   
@@ -40,18 +40,23 @@ module HtmlUtils =
       updatedNode
   
   let cloneHtmlDocument (html : HtmlDocument) : HtmlDocument = 
-      let mutable result = null
-      use writer = new StringWriter()
-      html.Save(writer)
-      result <- writer.ToString()
-      loadHtml result
-  
-  let processNodes (html : HtmlDocument) : HtmlDocument = 
+       loadHtml html.DocumentNode.OuterHtml
+  let processNodes (html : HtmlDocument) (processText:string->string) : HtmlDocument = 
       let updatedHtml = cloneHtmlDocument html
       let textNodes = getTextNodes updatedHtml
       for p in textNodes do
           if p :? HtmlTextNode then 
               let node = p :?> HtmlTextNode
-              let updatedNode = updateTextNode node "{{Test}}"
+              let processedText = processText node.Text
+              let updatedNode = updateTextNode node processedText
               p.ParentNode.ReplaceChild(updatedNode, p) |> ignore
       updatedHtml
+  
+  let htmlToText (html : HtmlDocument) = 
+      let mutable result = null
+      use writer = new StringWriter()
+      html.OptionWriteEmptyNodes <- true
+      html.OptionOutputAsXml <- false
+      html.Save(writer)
+      result <- writer.ToString()
+      result
