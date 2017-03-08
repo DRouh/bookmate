@@ -7,6 +7,8 @@ module Processor =
     open BookMate.Processing.Epub.Domain
     open BookMate.Processing.Epub.IO 
     open BookMate.Processing.POS
+    open BookMate.Processing.Translation
+    open BookMate.Processing.HtmlUtils
 
     let getFileName = Path.GetFileNameWithoutExtension
     let readAllText = File.ReadAllText
@@ -34,7 +36,15 @@ module Processor =
             |> Some
         | _ -> None
 
-    let processFileInEpub (rawFile: FileInEpub) : ProcessedFileInEpub = rawFile
+    let processFileInEpub (rawFile: FileInEpub) taggedWords translations : ProcessedFileInEpub = 
+      let htmlDoc = loadHtml rawFile.Content
+      let applyTranslations' =  applyTranslations taggedWords translations 
+      
+      let processingFunction text = applyTranslations' text 3
+
+      let processedHtml = processNodes htmlDoc processingFunction
+      let updatedContent = htmlToText processedHtml
+      { Name = rawFile.Name; Path = rawFile.Path; Content = updatedContent } 
     
     let processEpubBook (rawBook: BookToProcess) : ProcessedBook=
         { Files = rawBook.Files }
