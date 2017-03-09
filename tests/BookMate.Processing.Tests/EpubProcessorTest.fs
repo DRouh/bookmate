@@ -10,6 +10,7 @@ module EpubProcessorTest =
   open BookMate.Processing.Epub.IO
   open BookMate.Processing.Epub.Processor
   open BookMate.Processing.StanfordTagger
+  open BookMate.Processing.HtmlUtils
     
   let sampleDirectory = Path.Combine(Directory.GetCurrentDirectory(), "SampleData")
   let sampleFile = Directory.GetFiles(sampleDirectory, "*.epub").[0]
@@ -84,8 +85,8 @@ module EpubProcessorTest =
   
   [<Fact>]
   let ``Should apply translations to the file being processed``() = 
-    let exampleProcessedContent = File.ReadAllText sampleProcessedText
-    
+    let exampleProcessedContentHtml = File.ReadAllText sampleProcessedText |> loadHtml
+
     let exampleTaggedWords = 
         (parseStanfordNlpServiceResponse (File.ReadAllText sampleTaggedWords))
         |> Option.get
@@ -105,4 +106,5 @@ module EpubProcessorTest =
         |> toFileInEpub
     
     let { Name = _; Path = _; Content = content } = processFileInEpub rawFile exampleTaggedWords exampleTranslations
-    content |> should equal exampleProcessedContent
+    let processedContentHtml = loadHtml content
+    processedContentHtml.DocumentNode.OuterHtml |> should equal exampleProcessedContentHtml.DocumentNode.OuterHtml
