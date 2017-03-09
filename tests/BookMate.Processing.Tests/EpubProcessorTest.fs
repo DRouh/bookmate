@@ -85,7 +85,7 @@ module EpubProcessorTest =
   
   [<Fact>]
   let ``Should apply translations to the file being processed``() = 
-    let exampleProcessedContentHtml = File.ReadAllText sampleProcessedText |> loadHtml
+    let expectedHtml = File.ReadAllText sampleProcessedText |> loadHtml
 
     let exampleTaggedWords = 
         (parseStanfordNlpServiceResponse (File.ReadAllText sampleTaggedWords))
@@ -106,5 +106,5 @@ module EpubProcessorTest =
         |> toFileInEpub
     
     let { Name = _; Path = _; Content = content } = processFileInEpub rawFile exampleTaggedWords exampleTranslations
-    let processedContentHtml = loadHtml content
-    processedContentHtml.DocumentNode.OuterHtml |> should equal exampleProcessedContentHtml.DocumentNode.OuterHtml
+    let actualHtml = loadHtml content
+    actualHtml.DocumentNode.OuterHtml |> should equal expectedHtml.DocumentNode.OuterHtml
