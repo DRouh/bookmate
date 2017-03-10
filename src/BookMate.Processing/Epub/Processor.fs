@@ -32,15 +32,24 @@ module Processor =
             |> List.map toFileInEpub
         (files, bookLocation)
 
-    let analyseText (userPrefs : UserPrefs) (content : string) : Word list = []
+    let analyseText (file : OriginalFileInBook) (tagText : TagText)  = 
+      async {
+        let text = file.Content |> loadHtml |> getTextFromHtml |> String.concat " "
+        let! tags = text |> tagText
+        let wordsToTranslate = List.empty<Word> 
+        return { File = { Name = file.Name; Path = file.Path; Content = file.Content }; AnalysisData = { WordsToTranslate = wordsToTranslate; TaggedText = [] } }
+      }
 
-    let analyseBook  (userPrefs : UserPrefs) (originalBook : OriginalBook) : AnalysedBook = 
-      let (bookFiles, location) = originalBook
-      bookFiles 
-      |> List.map (fun bf ->
-          let text = bf.Content |> loadHtml |> getTextFromHtml |> String.concat " "
-          let wordsToTranslate = analyseText userPrefs text
-          { File = { Name = bf.Name; Path = bf.Path; Content = bf.Content }; AnalysisData = { WordsToTranslate = wordsToTranslate} })
+    // let analyseBook (userPrefs : UserPrefs) (originalBook : OriginalBook) (tagText : TagText) : Async<AnalysedBook> = 
+    //   async {
+    //     let (bookFiles, location) = originalBook
+    //     let! analysedBook = 
+    //       bookFiles 
+    //       |> Array.ofList
+    //       |> Array.Parallel.map (fun fb -> analyseText fb tagText)
+          
+    //     return (analysedBook |> List.ofArray)
+    //   }
 
     let processFileInEpub (rawFile: BookFile) taggedWords translations : ProcessedFileInBook = 
       let htmlDoc = loadHtml rawFile.Content

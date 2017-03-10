@@ -25,7 +25,7 @@ module Domain =
   
   type Translation = Word * Word * CommonPoS
 
-  type AnalysisData = { WordsToTranslate : Word list; }
+  type AnalysisData = { WordsToTranslate : Word list; TaggedText : TaggedWord list }
   type UserPrefs =  { WordsToTranslate : Word list; }
   type BookFile = 
       { Name : string
@@ -47,3 +47,4 @@ module Domain =
 
   type AnalyseBook = UserPrefs -> OriginalBook -> AnalysedBook
   type ProcessBook = AnalysedBook -> Translation list -> ProcessedBook
+  type TagText = string -> Async<(Word * CommonPoS list option)[] option>

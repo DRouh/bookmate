@@ -72,7 +72,6 @@ module StanfordTagger =
           return! fetchData (0)
       }
 
-
     let tagText (req: StanfordTextToTag) =
         async {
             let jsonText = req |> JsonUtils.toJson
@@ -80,3 +79,6 @@ module StanfordTagger =
             if token.IsSome then return! (token |> Option.get |> queryProcessingTokenComposition)
             else return None
         }
+
+    let stanfordTagText (text : string) =
+      { Text = text } |> tagText
