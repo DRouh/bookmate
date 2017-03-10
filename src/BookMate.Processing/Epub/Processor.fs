@@ -23,14 +23,24 @@ module Processor =
     
     let toAnyHtml = toFilePath AnyHtml
     
-    let readBook (unpackedBook : BookLocation) : OriginalBook = 
-        let (EpubFilePath filePath, UnpackedBookPath dirPath) = unpackedBook
+    let readBook (bookLocation : BookLocation) : OriginalBook = 
+        let (EpubFilePath filePath, UnpackedBookPath dirPath) = bookLocation
         let files = 
             Directory.GetFiles(dirPath, "*.*html", System.IO.SearchOption.AllDirectories)
             |> Seq.toList
             |> List.choose toAnyHtml
             |> List.map toFileInEpub
-        (files, unpackedBook)
+        (files, bookLocation)
+
+    let analyseText (userPrefs : UserPrefs) (content : string) : Word list = []
+
+    let analyseBook  (userPrefs : UserPrefs) (originalBook : OriginalBook) : AnalysedBook = 
+      let (bookFiles, location) = originalBook
+      bookFiles 
+      |> List.map (fun bf ->
+          let text = bf.Content |> loadHtml |> getTextFromHtml |> String.concat " "
+          let wordsToTranslate = analyseText userPrefs text
+          { File = { Name = bf.Name; Path = bf.Path; Content = bf.Content }; AnalysisData = { WordsToTranslate = wordsToTranslate} })
 
     let processFileInEpub (rawFile: BookFile) taggedWords translations : ProcessedFileInBook = 
       let htmlDoc = loadHtml rawFile.Content

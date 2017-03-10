@@ -26,7 +26,7 @@ module Domain =
   type Translation = Word * Word * CommonPoS
 
   type AnalysisData = { WordsToTranslate : Word list; }
-
+  type UserPrefs =  { WordsToTranslate : Word list; }
   type BookFile = 
       { Name : string
         Path : FilePath
@@ -45,5 +45,5 @@ module Domain =
   type AnalysedBook = BookFiles<AnalysedBookFile> 
   type ProcessedBook = BookFiles<ProcessedFileInBook>
 
-  type AnalyseBook = OriginalBook -> AnalysedBook
+  type AnalyseBook = UserPrefs -> OriginalBook -> AnalysedBook
   type ProcessBook = AnalysedBook -> Translation list -> ProcessedBook
