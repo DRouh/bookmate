@@ -42,16 +42,16 @@ module EpubProcessorTest =
   [<Fact>]
   let ``Read book should contain valid data about all files``() = 
     let (path, filePath, extractTargetPath) = getPaths()
-    let unpackedBook = extractBook (filePath) (extractTargetPath) |> Option.get
+    let bookLocation = extractBook (filePath) (extractTargetPath) |> Option.get
     let expectedFiles = 
         Directory.GetFiles(path, "*.*html", System.IO.SearchOption.AllDirectories) |> Seq.toList
-    let (actualFiles, actualLocation) = readBook unpackedBook
+    let (actualFiles, actualLocation) = readBook bookLocation
     //clean up
     do cleanUp path
     let actualFileCount = actualFiles |> List.length
     let actualFilePaths = actualFiles |> List.map ((fun f -> f.Path) >> (fun (AnyHtmlFilePath efp) -> efp))
     //validate contents of a read book
-    actualLocation |> should equal unpackedBook
+    actualLocation |> should equal bookLocation
     actualFilePaths |> should equal expectedFiles
     actualFiles
     |> List.map (fun f -> f.Content)
@@ -65,23 +65,23 @@ module EpubProcessorTest =
   [<Fact>]
   let ``Processed book should have the same number of files``() = 
     let (path, filePath, extractTargetPath) = getPaths()
-    let unpackedBook = extractBook filePath extractTargetPath |> Option.get
-    let (readFiles, readLocation) = readBook unpackedBook
+    let bookLocation = extractBook filePath extractTargetPath |> Option.get
+    let (readFiles, readLocation) = readBook bookLocation
     do cleanUp path
-    let processedFiles = processEpubBook (readFiles, readLocation)
-    processedFiles.Length |> should equal readFiles.Length
+    let processedBook = processEpubBook (readFiles, readLocation)
+    processedBook.Length |> should equal readFiles.Length
   
   [<Fact>]
   let ``Processed file should have the original name and path``() = 
-    let rawFile = 
+    let rawBookFile = 
         sampleHtmlDoc
         |> toAnyHtml
         |> Option.get
         |> toFileInEpub
     
-    let { Name = name; Path = path; Content = content } = processFileInEpub rawFile [] []
-    name |> should equal rawFile.Name
-    path |> should equal rawFile.Path
+    let { Name = name; Path = path; Content = content } = processFileInEpub rawBookFile [] []
+    name |> should equal rawBookFile.Name
+    path |> should equal rawBookFile.Path
   
   [<Fact>]
   let ``Should apply translations to the file being processed``() = 
@@ -99,12 +99,12 @@ module EpubProcessorTest =
           ("reproduced", "воспроизведен", Verb)
           ("work", "работа", Noun) ]
     
-    let rawFile = 
+    let rawBookFile = 
         sampleHtmlDoc
         |> toAnyHtml
         |> Option.get
         |> toFileInEpub
     
-    let { Name = _; Path = _; Content = content } = processFileInEpub rawFile exampleTaggedWords exampleTranslations
+    let { Name = _; Path = _; Content = content } = processFileInEpub rawBookFile exampleTaggedWords exampleTranslations
     let actualHtml = loadHtml content
     actualHtml.DocumentNode.OuterHtml |> should equal expectedHtml.DocumentNode.OuterHtml
