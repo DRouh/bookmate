@@ -81,4 +81,5 @@ module StanfordTagger =
         }
 
     let stanfordTagText (text : string) =
-      { Text = text } |> tagText
+      let textToTag = { Text = text } : StanfordTextToTag
+      textToTag |> tagText
