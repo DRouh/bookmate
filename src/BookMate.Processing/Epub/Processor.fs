@@ -53,7 +53,7 @@ module Processor =
 
     let determineWordsToTranslate taggedWords = async { return List.empty<Word> }
 
-    let analyseText (file : OriginalFileInBook) (tagText : TagText) = 
+    let analyseText file tagText determineWordsToTranslate = 
         async { 
             let! taggedWords = tagWords file.Content tagText
             let! wordsToTranslate = determineWordsToTranslate taggedWords
@@ -71,7 +71,7 @@ module Processor =
             let (bookFiles, _) = originalBook
             let! analysedBook = bookFiles
                                 |> Array.ofList
-                                |> Array.Parallel.map (fun fb -> analyseText fb tagText)
+                                |> Array.Parallel.map (fun fb -> analyseText fb tagText determineWordsToTranslate)
                                 |> Async.Parallel
             return analysedBook |> List.ofArray
         }

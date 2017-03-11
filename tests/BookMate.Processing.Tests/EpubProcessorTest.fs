@@ -108,3 +108,41 @@ module EpubProcessorTest =
     let { Name = _; Path = _; Content = content } = processFileInEpub rawBookFile exampleTaggedWords exampleTranslations
     let actualHtml = loadHtml content
     actualHtml.DocumentNode.OuterHtml |> should equal expectedHtml.DocumentNode.OuterHtml
+
+  [<Fact>]
+  let ``Should analyse tag text correctly``() = 
+    let taggedWords =  sampleTaggedWords |> File.ReadAllText |> parseStanfordNlpServiceResponse
+    let wordsToTranslate = List.empty<Word>
+    
+    let bookFile = 
+        sampleHtmlDoc
+        |> toAnyHtml
+        |> Option.get
+        |> toFileInEpub
+    
+    let expected = 
+        { File = bookFile
+          AnalysisData = 
+              { WordsToTranslate = wordsToTranslate
+                TaggedText = 
+                    [ ("The", [ Noun; Pronoun; Particle ]);("documents", [ Noun ]);("canonically", [ Adverb ])
+                      ("located", [ Adjective ]);("at", [ Preposition; Conjunction ]);("reproduced", [ Verb; Participle ])
+                      ("in", [ Preposition; Conjunction ]);("EPUB", [ Noun ]);("3", [ Numeral ]);("format", [ Noun ])
+                      ("All", [ Noun; Pronoun; Particle ]);("rights", [ Noun ]);("reserved", [ Verb; Participle ])
+                      ("This", [ Noun; Pronoun; Particle ]);("work", [ Noun ]);("is", [ Verb ]);("protected", [ Verb; Participle ])
+                      ("under", [ Preposition; Conjunction ]);("17", [ Numeral ]);("of", [ Preposition; Conjunction ])
+                      ("the", [ Noun; Pronoun; Particle ]);("and", [ Conjunction ]);("dissemination", [ Noun ])
+                      ("of", [ Preposition; Conjunction ]);("this", [ Noun; Pronoun; Particle ]);("work", [ Noun ])
+                      ("with", [ Preposition; Conjunction ]);("changes", [ Noun ]);("is", [ Verb ])
+                      ("prohibited", [ Verb; Participle ]);("except", [ Preposition; Conjunction ])
+                      ("with", [ Preposition; Conjunction ]);("the", [ Noun; Pronoun; Particle ])
+                      ("written", [ Verb; Participle ]);("permission", [ Noun ]);("of", [ Preposition; Conjunction ])
+                      ("the", [ Noun; Pronoun; Particle ]);("EPUB", [ Noun ]);("is", [ Verb ]);("a", [ Noun; Pronoun; Particle ])
+                      ("registered", [ Verb; Participle ]);("trademark", [ Noun ]);("of", [ Preposition; Conjunction ])
+                      ("the", [ Noun; Pronoun; Particle ]) ] } }
+
+    let tagTextMock text = async { return taggedWords }
+    let determineWordsToTranslateMock taggedWords = async { return wordsToTranslate }
+
+    let analysedText = (analyseText bookFile tagTextMock determineWordsToTranslateMock) |> Async.RunSynchronously
+    analysedText |> should equal expected
