@@ -45,6 +45,7 @@ module Domain =
   type AnalysedBook = BookFiles<AnalysedBookFile> 
   type ProcessedBook = BookFiles<ProcessedFileInBook>
 
+//transition functions
   type AnalyseBook = UserPrefs -> OriginalBook -> AnalysedBook
   type ProcessBook = AnalysedBook -> Translation list -> ProcessedBook
   type TagText = string -> Async<(Word * CommonPoS list option)[] option>
