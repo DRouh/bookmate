@@ -17,6 +17,7 @@
     "analysis": true,
     "database": true,
     ".gitignore": true,
-    "**/project.lock.json": true
+    "**/project.lock.json": true,
+    "data":true
   }
 }

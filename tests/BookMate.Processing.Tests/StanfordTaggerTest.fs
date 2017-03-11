@@ -1,6 +1,6 @@
 namespace BookMate.Processing.Tests
 
-module StanfordTaggerTests = 
+module StanfordTaggerTest = 
     open System
     open Xunit
     open FsUnit.Xunit
@@ -21,7 +21,7 @@ module StanfordTaggerTests =
         actual.Value = token |> should be True
     
     [<Fact>]
-    let ``123``() = 
+    let ``Should parse NLP service response``() = 
         let jsonExample = """
             {
                 "uuid": "42401cf8-5d4b-49a1-a761-668a11468318",

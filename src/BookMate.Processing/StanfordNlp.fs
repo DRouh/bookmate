@@ -1,10 +1,7 @@
 namespace BookMate.Processing
 
 module StanfordNlp = 
-      open System
       open BookMate.Processing.POS
-      open BookMate.Core.JsonUtils
-      open BookMate.Core.Monads.Maybe
 
       type StanfordPoS = 
         | CC //Coordinating conjunction

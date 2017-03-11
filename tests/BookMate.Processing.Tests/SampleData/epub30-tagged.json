@@ -1,0 +1,261 @@
+{
+  "uuid": "5e656df6-a014-4293-8e1a-120a2a528a79",
+  "tagged": [
+    {
+      "word": "The",
+      "tag": "DT"
+    },
+    {
+      "word": "documents",
+      "tag": "NNS"
+    },
+    {
+      "word": "canonically",
+      "tag": "RB"
+    },
+    {
+      "word": "located",
+      "tag": "JJ"
+    },
+    {
+      "word": "at",
+      "tag": "IN"
+    },
+    {
+      "word": "reproduced",
+      "tag": "VBN"
+    },
+    {
+      "word": "in",
+      "tag": "IN"
+    },
+    {
+      "word": "EPUB",
+      "tag": "NN"
+    },
+    {
+      "word": "3",
+      "tag": "CD"
+    },
+    {
+      "word": "format",
+      "tag": "NN"
+    },
+    {
+      "word": "All",
+      "tag": "DT"
+    },
+    {
+      "word": "rights",
+      "tag": "NNS"
+    },
+    {
+      "word": "reserved",
+      "tag": "VBN"
+    },
+    {
+      "word": ".",
+      "tag": "."
+    },
+    {
+      "word": "This",
+      "tag": "DT"
+    },
+    {
+      "word": "work",
+      "tag": "NN"
+    },
+    {
+      "word": "is",
+      "tag": "VBZ"
+    },
+    {
+      "word": "protected",
+      "tag": "VBN"
+    },
+    {
+      "word": "under",
+      "tag": "IN"
+    },
+    {
+      "word": "Title",
+      "tag": "NNP"
+    },
+    {
+      "word": "17",
+      "tag": "CD"
+    },
+    {
+      "word": "of",
+      "tag": "IN"
+    },
+    {
+      "word": "the",
+      "tag": "DT"
+    },
+    {
+      "word": "United",
+      "tag": "NNP"
+    },
+    {
+      "word": "States",
+      "tag": "NNP"
+    },
+    {
+      "word": "Code",
+      "tag": "NNP"
+    },
+    {
+      "word": ".",
+      "tag": "."
+    },
+    {
+      "word": "Reproduction",
+      "tag": "NNP"
+    },
+    {
+      "word": "and",
+      "tag": "CC"
+    },
+    {
+      "word": "dissemination",
+      "tag": "NN"
+    },
+    {
+      "word": "of",
+      "tag": "IN"
+    },
+    {
+      "word": "this",
+      "tag": "DT"
+    },
+    {
+      "word": "work",
+      "tag": "NN"
+    },
+    {
+      "word": "with",
+      "tag": "IN"
+    },
+    {
+      "word": "changes",
+      "tag": "NNS"
+    },
+    {
+      "word": "is",
+      "tag": "VBZ"
+    },
+    {
+      "word": "prohibited",
+      "tag": "VBN"
+    },
+    {
+      "word": "except",
+      "tag": "IN"
+    },
+    {
+      "word": "with",
+      "tag": "IN"
+    },
+    {
+      "word": "the",
+      "tag": "DT"
+    },
+    {
+      "word": "written",
+      "tag": "VBN"
+    },
+    {
+      "word": "permission",
+      "tag": "NN"
+    },
+    {
+      "word": "of",
+      "tag": "IN"
+    },
+    {
+      "word": "the",
+      "tag": "DT"
+    },
+    {
+      "word": "International",
+      "tag": "NNP"
+    },
+    {
+      "word": "Digital",
+      "tag": "NNP"
+    },
+    {
+      "word": "Publishing",
+      "tag": "NNP"
+    },
+    {
+      "word": "Forum",
+      "tag": "NNP"
+    },
+    {
+      "word": "-LRB-",
+      "tag": "-LRB-"
+    },
+    {
+      "word": "IDPF",
+      "tag": "NNP"
+    },
+    {
+      "word": "-RRB-",
+      "tag": "-RRB-"
+    },
+    {
+      "word": ".",
+      "tag": "."
+    },
+    {
+      "word": "EPUB",
+      "tag": "NN"
+    },
+    {
+      "word": "is",
+      "tag": "VBZ"
+    },
+    {
+      "word": "a",
+      "tag": "DT"
+    },
+    {
+      "word": "registered",
+      "tag": "VBN"
+    },
+    {
+      "word": "trademark",
+      "tag": "NN"
+    },
+    {
+      "word": "of",
+      "tag": "IN"
+    },
+    {
+      "word": "the",
+      "tag": "DT"
+    },
+    {
+      "word": "International",
+      "tag": "NNP"
+    },
+    {
+      "word": "Digital",
+      "tag": "NNP"
+    },
+    {
+      "word": "Publishing",
+      "tag": "NNP"
+    },
+    {
+      "word": "Forum",
+      "tag": "NNP"
+    },
+    {
+      "word": ".",
+      "tag": "."
+    }
+  ]
+}
