@@ -1,0 +1,29 @@
+{
+  "version": "1.0.0-*",
+  "buildOptions": {
+    "debugType": "portable",
+    "compilerName": "fsc",
+    "compile": {
+      "includeFiles": [
+        "Mongo.fs"
+      ]
+    }
+  },
+  "tools": {
+    "dotnet-compile-fsc": "1.0.0-preview2-*"
+  },
+  "frameworks": {
+    "netstandard1.6": {
+      "dependencies": {
+        "NETStandard.Library": "1.6.0",
+        "System.IO": "*",
+        "System.IO.Compression": "*"
+      },
+      "FSharp.Core": "4.1.0"
+    }
+  },
+  "dependencies": {
+    "BookMate.Core": "*",
+    "MongoDB.Driver": "2.4.3"
+  }
+}

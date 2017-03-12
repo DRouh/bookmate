@@ -6,5 +6,6 @@
   "DBConnectionString": "",
   "UserDefinedWordsFilePath": "",
   "StanfordTaggerFilePath": "",
-  "StanfordTaggerEndpoint": "http://localhost:8080/api/tagger/stanford"
+  "StanfordTaggerEndpoint": "http://localhost:8080/api/tagger/stanford",
+  "TranslationsConnectionString" : "mongodb://localhost"
 }

@@ -15,6 +15,7 @@ module Configuration =
         UserDefinedWordsFilePath: string
         StanfordTaggerFilePath: string
         StanfordTaggerEndpoint: string
+        TranslationsConnectionString : string
     }
 
     let applicationJsonActual = @"appconfiguration.json"
@@ -52,3 +53,4 @@ module Configuration =
     let public getStanfordTaggerFilePath () = getApplicationConfiguration().StanfordTaggerFilePath
 
     let public getStanfordTaggerEndpoint () = getApplicationConfiguration().StanfordTaggerEndpoint
+    let public getTranslationsConnectionString () = getApplicationConfiguration().TranslationsConnectionString
