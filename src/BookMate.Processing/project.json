@@ -35,6 +35,7 @@
   },
   "dependencies": {
     "BookMate.Core": "*",
-    "BookMate.Integration": "*"
+    "BookMate.Integration": "*",
+    "BookMate.Database": "*"
   }
 }

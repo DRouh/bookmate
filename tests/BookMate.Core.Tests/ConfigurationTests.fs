@@ -6,7 +6,7 @@ module ConfigurationTests =
     open BookMate.Core.Configuration
 
     let expectedConfiguration () : ApplicationConfiguration = 
-        {
+      {
             YandexTranslateApiEndPoint="YandexTranslateApiEndPoint"
             YandexTranslateApiKey="YandexTranslateApiKey"
             YandexDictionaryApiEndPoint="YandexDictionaryApiEndPoint"
@@ -15,6 +15,7 @@ module ConfigurationTests =
             UserDefinedWordsFilePath="UserDefinedWordsFilePath"
             StanfordTaggerFilePath = "StanfordTaggerFilePath"
             StanfordTaggerEndpoint = "StanfordTaggerEndpoint"
+            TranslationsConnectionString = "TranslationsConnectionString"
         }
 
     [<Fact>]
@@ -28,7 +29,8 @@ module ConfigurationTests =
                 "DBConnectionString": "DBConnectionString",
                 "UserDefinedWordsFilePath": "UserDefinedWordsFilePath",
                 "StanfordTaggerFilePath": "StanfordTaggerFilePath",
-                "StanfordTaggerEndpoint": "StanfordTaggerEndpoint"
+                "StanfordTaggerEndpoint": "StanfordTaggerEndpoint",
+                "TranslationsConnectionString": "TranslationsConnectionString"
             }
         """
         let actualConfiguration = loadConfigurationFromJsonText jsonToTest
